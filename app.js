@@ -24,11 +24,24 @@ function addTask() {
   taskInput.value = '';
 }
 
+function deleteTask(id) {
+  tasks = tasks.filter(task => task.id !== id);
+  saveTasks();
+  renderTasks();
+}
+
 function renderTasks() {
   taskList.innerHTML = '';
   tasks.forEach(task => {
     const li = document.createElement('li');
     li.textContent = task.title;
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.className = 'delete-btn';
+    deleteBtn.addEventListener('click', () => deleteTask(task.id));
+    li.appendChild(deleteBtn);
+
     taskList.appendChild(li);
   });
 }

@@ -16,3 +16,12 @@ Feature: Task Management
     When the user requests the list of tasks
     Then the user should see 2 tasks
     And the tasks should include "Buy groceries" and "Read a book"
+
+  Scenario: Delete a task
+    Given the user has the following tasks:
+      | title            |
+      | Buy groceries    |
+      | Read a book      |
+    When the user deletes the task "Buy groceries"
+    Then the user should see 1 task
+    And the tasks should include "Read a book"

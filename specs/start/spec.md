@@ -43,6 +43,12 @@ const tasks = []    // array to store tasks
 - Tasks displayed as `<li>` items in the `<ul>`
 - Each task shows its title
 
+### 3. Delete Task
+- Each task has a delete button
+- User clicks delete button to remove task
+- Task is removed from the list
+- Updated list persists to localStorage
+
 ## CSS Styling
 
 - Centered layout with max-width
