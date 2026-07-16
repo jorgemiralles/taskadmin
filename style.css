@@ -48,8 +48,9 @@ h1 {
 }
 
 #startDate {
-  width: 150px;
+  width: 180px;
   padding: 12px;
+  padding-right: 32px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 16px;
@@ -238,6 +239,7 @@ li:last-child {
 
 #editStartDate {
   padding: 12px;
+  padding-right: 32px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 16px;
