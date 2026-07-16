@@ -22,3 +22,9 @@
 - **Install:** `apk add darkhttpd`
 - **Run:** `darkhttpd /home/taskadmin --port 8080 --daemon`
 - **Access:** `http://localhost:8080` from Windows host
+
+## Git
+
+- **Commit Convention:** [Conventional Commits](https://www.conventionalcommits.org/)
+- **Format:** `type(scope): description`
+- **Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`, `build`, `perf`
