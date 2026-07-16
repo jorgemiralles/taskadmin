@@ -71,7 +71,7 @@ const tasks = []      // array to store tasks
 - Clean, minimal design
 - Styled input and button
 - Task list with basic spacing
-- Flex-wrap on input group for responsive layout
+- Form fields laid out in a single flex row (no wrapping)
 - Task info display with dates and status
 - Color-coded status badges (pending, in-progress, completed)
 - Styled select dropdown
