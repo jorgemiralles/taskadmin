@@ -83,9 +83,9 @@ test.describe('Task Manager', () => {
     await page.click('#addBtn');
     await expect(page.locator('#taskList li')).toHaveCount(1);
 
-    await page.click('.delete-btn');
+    await page.locator('.btn-danger.btn-sm').first().click();
     await expect(page.locator('#confirmModal')).toBeVisible();
-    await expect(page.locator('.modal-content p')).toHaveText('Are you sure you want to delete this task?');
+    await expect(page.locator('.modal-body p')).toHaveText('Are you sure you want to delete this task?');
 
     await page.click('#confirmDeleteBtn');
     await expect(page.locator('#taskList li')).toHaveCount(0);
@@ -104,7 +104,7 @@ test.describe('Task Manager', () => {
 
     await expect(page.locator('#taskList li')).toHaveCount(3);
 
-    await page.locator('#taskList li', { hasText: 'Remove' }).locator('.delete-btn').click();
+    await page.locator('#taskList li', { hasText: 'Remove' }).locator('.btn-danger.btn-sm').click();
     await expect(page.locator('#confirmModal')).toBeVisible();
 
     await page.click('#confirmDeleteBtn');
@@ -118,7 +118,7 @@ test.describe('Task Manager', () => {
     await page.click('#addBtn');
     await expect(page.locator('#taskList li')).toHaveCount(1);
 
-    await page.click('.delete-btn');
+    await page.locator('.btn-danger.btn-sm').first().click();
     await expect(page.locator('#confirmModal')).toBeVisible();
 
     await page.click('#cancelDeleteBtn');
@@ -134,7 +134,7 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Task B');
     await page.click('#addBtn');
 
-    await page.locator('#taskList li', { hasText: 'Task A' }).locator('.delete-btn').click();
+    await page.locator('#taskList li', { hasText: 'Task A' }).locator('.btn-danger.btn-sm').click();
     await expect(page.locator('#confirmModal')).toBeVisible();
 
     await page.click('#cancelDeleteBtn');
@@ -163,7 +163,7 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Task B');
     await page.click('#addBtn');
 
-    const deleteButtons = page.locator('.delete-btn');
+    const deleteButtons = page.locator('.btn-danger.btn-sm');
     await expect(deleteButtons).toHaveCount(2);
   });
 
@@ -174,7 +174,7 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Task B');
     await page.click('#addBtn');
 
-    const editButtons = page.locator('.edit-btn');
+    const editButtons = page.locator('.btn-primary.btn-sm');
     await expect(editButtons).toHaveCount(2);
   });
 
@@ -188,7 +188,7 @@ test.describe('Task Manager', () => {
     await page.selectOption('#taskStatus', 'in-progress');
     await page.click('#addBtn');
 
-    await page.locator('.edit-btn').first().click();
+    await page.locator('.btn-primary.btn-sm').first().click();
 
     await expect(page.locator('#editModal')).toBeVisible();
     await expect(page.locator('#editTitle')).toHaveValue('Original task');
@@ -200,7 +200,7 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Buy groceries');
     await page.click('#addBtn');
 
-    await page.locator('.edit-btn').first().click();
+    await page.locator('.btn-primary.btn-sm').first().click();
     await page.fill('#editTitle', 'Buy organic groceries');
     await page.click('#saveEditBtn');
 
@@ -212,7 +212,7 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Task status');
     await page.click('#addBtn');
 
-    await page.locator('.edit-btn').first().click();
+    await page.locator('.btn-primary.btn-sm').first().click();
     await page.selectOption('#editStatus', 'completed');
     await page.click('#saveEditBtn');
 
@@ -224,7 +224,7 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Dated task');
     await page.click('#addBtn');
 
-    await page.locator('.edit-btn').first().click();
+    await page.locator('.btn-primary.btn-sm').first().click();
     await page.fill('#editStartDate', '2026-08-01');
     await page.click('#saveEditBtn');
 
@@ -235,7 +235,7 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Original');
     await page.click('#addBtn');
 
-    await page.locator('.edit-btn').first().click();
+    await page.locator('.btn-primary.btn-sm').first().click();
     await page.fill('#editTitle', 'Changed');
     await page.click('#cancelEditBtn');
 
@@ -250,7 +250,7 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Task B');
     await page.click('#addBtn');
 
-    await page.locator('.edit-btn').first().click();
+    await page.locator('.btn-primary.btn-sm').first().click();
     await page.fill('#editTitle', 'Task A edited');
     await page.click('#saveEditBtn');
 
@@ -263,7 +263,7 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Persistent');
     await page.click('#addBtn');
 
-    await page.locator('.edit-btn').first().click();
+    await page.locator('.btn-primary.btn-sm').first().click();
     await page.fill('#editTitle', 'Persistent edited');
     await page.click('#saveEditBtn');
 

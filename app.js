@@ -19,6 +19,9 @@ let nextId = 1;
 let editingTaskId = null;
 let pendingDeleteId = null;
 
+const confirmBootstrapModal = new bootstrap.Modal(confirmModal);
+const editBootstrapModal = new bootstrap.Modal(editModal);
+
 function getTodayDate() {
   const now = new Date();
   const year = now.getFullYear();
@@ -61,13 +64,13 @@ function showEditModal(id) {
   editTitle.value = task.title;
   editStartDate.value = task.startDate || '';
   editStatus.value = task.status;
-  editModal.style.display = 'flex';
+  editBootstrapModal.show();
   editTitle.focus();
 }
 
 function hideEditModal() {
   editingTaskId = null;
-  editModal.style.display = 'none';
+  editBootstrapModal.hide();
 }
 
 function saveEdit() {
@@ -110,7 +113,7 @@ function addTask(e) {
 
 function deleteTask(id) {
   pendingDeleteId = id;
-  confirmModal.style.display = 'flex';
+  confirmBootstrapModal.show();
 }
 
 function confirmDelete() {
@@ -120,20 +123,21 @@ function confirmDelete() {
     hideEditModal();
   }
   pendingDeleteId = null;
-  confirmModal.style.display = 'none';
+  confirmBootstrapModal.hide();
   saveState();
   renderTasks();
 }
 
 function cancelDelete() {
   pendingDeleteId = null;
-  confirmModal.style.display = 'none';
+  confirmBootstrapModal.hide();
 }
 
 function renderTasks() {
   taskList.innerHTML = '';
   tasks.forEach(task => {
     const li = document.createElement('li');
+    li.className = 'list-group-item d-flex justify-content-between align-items-center';
 
     const taskInfo = document.createElement('div');
     taskInfo.className = 'task-info';
@@ -162,13 +166,13 @@ function renderTasks() {
 
     const editBtn = document.createElement('button');
     editBtn.textContent = 'Edit';
-    editBtn.className = 'edit-btn';
+    editBtn.className = 'btn btn-primary btn-sm';
     editBtn.addEventListener('click', () => showEditModal(task.id));
     actionsDiv.appendChild(editBtn);
 
     const deleteBtn = document.createElement('button');
     deleteBtn.textContent = 'Delete';
-    deleteBtn.className = 'delete-btn';
+    deleteBtn.className = 'btn btn-danger btn-sm';
     deleteBtn.addEventListener('click', () => deleteTask(task.id));
     actionsDiv.appendChild(deleteBtn);
 

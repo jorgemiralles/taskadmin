@@ -2,7 +2,7 @@
 
 ## Overview
 
-A simple client-side web application for managing tasks using vanilla JavaScript, HTML, and CSS.
+A simple client-side web application for managing tasks using vanilla JavaScript, HTML, and CSS, styled with Bootstrap 5 framework.
 
 ## Data Structure
 
@@ -26,21 +26,30 @@ const tasks = []      // array to store tasks
 ## HTML Structure
 
 ```html
-- <h1> page title
-- <input> for task title (full width)
-- <div class="form-row"> containing:
-  - <input type="date"> for start date
-  - <select> for task status (pending, in-progress, completed)
-- <button> to add task (sits below fields)
-- <ul> task list container
-- <div id="confirmModal"> confirmation popup overlay
-  - <div class="modal-content"> containing message and Confirm/Cancel buttons
-- <div id="editModal"> edit popup overlay
-  - <div class="modal-content"> containing:
-    - <input> for task title
-    - <input type="date"> for start date
-    - <select> for task status
-    - Save and Cancel buttons
+- <div class="container mt-4"> main container
+- <h1 class="mb-4 text-center"> page title
+- <form id="taskForm"> using Bootstrap form classes
+  - <input class="form-control mb-2"> for task title (full width)
+  - <div class="row g-2 mb-2"> containing:
+    - <div class="col"><input type="date" class="form-control"> for start date
+    - <div class="col"><select class="form-select"> for task status (pending, in-progress, completed)
+  - <button class="btn btn-success w-100" type="submit"> to add task
+- <ul id="taskList" class="list-group"> task list container using Bootstrap list-group
+- <div id="confirmModal" class="modal"> using Bootstrap modal
+  - <div class="modal-dialog modal-dialog-centered"> containing:
+    - <div class="modal-content">:
+      - <div class="modal-header"> with title and close button
+      - <div class="modal-body"> with confirmation message
+      - <div class="modal-footer"> with Confirm/Cancel buttons using Bootstrap btn classes
+- <div id="editModal" class="modal"> using Bootstrap modal
+  - <div class="modal-dialog modal-dialog-centered"> containing:
+    - <div class="modal-content">:
+      - <div class="modal-header"> with title and close button
+      - <div class="modal-body"> with form fields:
+        - <input class="form-control"> for task title
+        - <input type="date" class="form-control"> for start date
+        - <select class="form-select"> for task status
+      - <div class="modal-footer"> with Save and Cancel buttons using Bootstrap btn classes
 ```
 
 ## Features
@@ -76,21 +85,16 @@ const tasks = []      // array to store tasks
 
 ## CSS Styling
 
-- Centered layout with max-width
-- Clean, minimal design
-- Styled input and button
-- Task list with basic spacing
-- Form is a vertical column: task title fills width, date+status on a second row, Add button below
-- Task title input has larger text (16px) and padding (12px)
-- Task info display with dates and status
-- Color-coded status badges (pending, in-progress, completed)
-- Styled select dropdown
-- Edit button (blue) on each task
-- Modal overlay with semi-transparent background
-- Modal content box with white background, padding, border-radius, and shadow
-- Confirm button (red) and Cancel button (gray) in confirm modal
-- Edit modal with form fields (title input, date input, select dropdown)
-- Save button (green) and Cancel button (gray) in edit modal
+- Bootstrap 5 CSS framework loaded via CDN
+- Bootstrap container for centered layout
+- Bootstrap form classes (form-control, form-select) for inputs
+- Bootstrap button classes (btn, btn-success, btn-danger, btn-secondary)
+- Bootstrap list-group for task list
+- Bootstrap modal for confirm and edit popups
+- Bootstrap utility classes for spacing (mb-2, mt-4, etc.)
+- Bootstrap grid system (row, col) for form layout
+- Custom status badge colors (pending=warning, in-progress=info, completed=success)
+- Minimal custom CSS overrides for Bootstrap defaults
 
 ## JavaScript (app.js)
 
@@ -99,10 +103,10 @@ const tasks = []      // array to store tasks
 - On submit: create task object with title, startDate, status
 - On submit: create `<li>` element with task info, append to `<ul>`, clear inputs
 - Store tasks in localStorage
-- Render tasks with title, date, status badge, edit button, and delete button
-- On delete click: show confirmation modal, track pending delete task id
+- Render tasks with title, date, status badge, edit button, and delete button using Bootstrap list-group-item classes
+- On delete click: show confirmation modal using Bootstrap modal API (new bootstrap.Modal)
 - On confirm: remove task from array and localStorage, re-render
 - On cancel: hide modal, clear pending delete id
-- On edit click: show edit modal, populate form with task data, track editing task id
+- On edit click: show edit modal using Bootstrap modal API, populate form with task data, track editing task id
 - On save: update task in array, hide edit modal, re-render
 - On cancel: hide edit modal, clear editing task id
