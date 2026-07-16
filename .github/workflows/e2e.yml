@@ -1,4 +1,4 @@
-name: E2E Tests
+name: CI/CD
 
 on:
   push:
@@ -40,3 +40,16 @@ jobs:
           name: playwright-report
           path: test-results/
           retention-days: 14
+
+  deploy:
+    needs: e2e
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .

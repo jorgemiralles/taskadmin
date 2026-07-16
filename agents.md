@@ -37,10 +37,9 @@
 
 - **Platform:** GitHub Actions
 - **Workflow:** `.github/workflows/e2e.yml`
-- **Triggers:** Push/PR to `main`
-- **Runner:** `ubuntu-latest`
-- **Steps:** Checkout → Node.js 20 → darkhttpd (`.deb`) → `npm ci` → Playwright Chromium + deps → `npm test`
-- **Artifacts:** `test-results/` uploaded (14-day retention)
+- **Jobs:**
+  - **e2e** — Runs on push/PR to `main`. Installs darkhttpd + Playwright Chromium, runs tests, uploads artifacts.
+  - **deploy** — Runs only on push to `main`, depends on `e2e` passing. Deploys static files to GitHub Pages.
 
 ## Git
 
