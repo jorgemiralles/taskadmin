@@ -31,11 +31,16 @@ const tasks = []      // array to store tasks
 - <div class="form-row"> containing:
   - <input type="date"> for start date
   - <select> for task status (pending, in-progress, completed)
-- <button> to add task (text changes to "Save" when editing, sits below fields)
-- <button> to cancel editing (hidden by default)
+- <button> to add task (sits below fields)
 - <ul> task list container
 - <div id="confirmModal"> confirmation popup overlay
   - <div class="modal-content"> containing message and Confirm/Cancel buttons
+- <div id="editModal"> edit popup overlay
+  - <div class="modal-content"> containing:
+    - <input> for task title
+    - <input type="date"> for start date
+    - <select> for task status
+    - Save and Cancel buttons
 ```
 
 ## Features
@@ -62,12 +67,11 @@ const tasks = []      // array to store tasks
 
 ### 4. Edit Task
 - Each task has an edit button
-- User clicks edit button to enter edit mode
-- Form fields populate with the task's current values
-- Add button text changes to "Save", cancel button becomes visible
+- User clicks edit button to open edit popup
+- Popup displays form with fields for title, start date, and status pre-filled with task data
 - User modifies fields and clicks "Save" to update the task
-- User clicks "Cancel" to exit edit mode without changes
-- After saving, form clears and returns to add mode
+- User clicks "Cancel" to close the popup without changes
+- After saving, popup closes and task list updates
 
 ## CSS Styling
 
@@ -81,15 +85,16 @@ const tasks = []      // array to store tasks
 - Color-coded status badges (pending, in-progress, completed)
 - Styled select dropdown
 - Edit button (blue) on each task
-- Cancel button (gray, hidden by default) in form
 - Modal overlay with semi-transparent background
 - Modal content box with white background, padding, border-radius, and shadow
-- Confirm button (red) and Cancel button (gray) in modal
+- Confirm button (red) and Cancel button (gray) in confirm modal
+- Edit modal with form fields (title input, date input, select dropdown)
+- Save button (green) and Cancel button (gray) in edit modal
 
 ## JavaScript (app.js)
 
-- Select DOM elements (input, date input, select, button, cancel button, list, modal, confirm/cancel buttons)
-- Add click/keypress event listener
+- Select DOM elements (input, date input, select, button, list, confirm modal, edit modal, edit form fields, save/cancel buttons)
+- Add click/keypress event listener for task creation
 - On submit: create task object with title, startDate, status
 - On submit: create `<li>` element with task info, append to `<ul>`, clear inputs
 - Store tasks in localStorage
@@ -97,7 +102,6 @@ const tasks = []      // array to store tasks
 - On delete click: show confirmation modal, track pending delete task id
 - On confirm: remove task from array and localStorage, re-render
 - On cancel: hide modal, clear pending delete id
-- Track editingTaskId (null when not editing)
-- On edit click: populate form with task data, switch to edit mode
-- On save: update task in array, exit edit mode, re-render
-- On cancel: clear form, exit edit mode
+- On edit click: show edit modal, populate form with task data, track editing task id
+- On save: update task in array, hide edit modal, re-render
+- On cancel: hide edit modal, clear editing task id

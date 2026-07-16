@@ -204,6 +204,53 @@ li:last-child {
   background: #757575;
 }
 
+.save-edit-btn {
+  background: #4CAF50;
+  padding: 8px 20px;
+}
+
+.save-edit-btn:hover {
+  background: #45a049;
+}
+
+.cancel-edit-btn {
+  background: #9e9e9e;
+  padding: 8px 20px;
+}
+
+.cancel-edit-btn:hover {
+  background: #757575;
+}
+
+#editModal .modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+#editTitle {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+#editStartDate {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+#editStatus {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  background: white;
+}
+
 .status-pending {
   background: #fff3e0;
   color: #e65100;

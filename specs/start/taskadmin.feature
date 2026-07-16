@@ -63,16 +63,28 @@ Feature: Task Management
     When the user edits the task "Project report" with start date "2026-08-01"
     Then the task "Project report" should have start date "2026-08-01"
 
-  Scenario: Cancel editing a task
+  Scenario: Edit a task via popup
     Given the user has a task "Buy groceries" with status "pending"
-    When the user starts editing the task "Buy groceries" and cancels
+    When the user clicks edit on the task "Buy groceries"
+    Then an edit popup should appear with fields for title, start date, and status
+    When the user changes the title to "Buy organic groceries" in the popup and saves
+    Then the task "Buy organic groceries" should be in the task list
+    And the task "Buy groceries" should not be in the task list
+
+  Scenario: Cancel edit popup
+    Given the user has a task "Buy groceries" with status "pending"
+    When the user clicks edit on the task "Buy groceries"
+    Then an edit popup should appear with fields for title, start date, and status
+    When the user cancels the edit popup
     Then the task "Buy groceries" should remain unchanged with status "pending"
 
-  Scenario: Edit preserves other tasks
+  Scenario: Edit preserves other tasks via popup
     Given the user has the following tasks:
       | title            | status     |
       | Buy groceries    | pending    |
       | Read a book      | in-progress |
-    When the user edits the task "Buy groceries" to title "Buy organic groceries"
+    When the user clicks edit on the task "Buy groceries"
+    Then an edit popup should appear with fields for title, start date, and status
+    When the user changes the title to "Buy organic groceries" in the popup and saves
     Then the user should see 2 tasks
     And the tasks should include "Buy organic groceries" and "Read a book"

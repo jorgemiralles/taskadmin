@@ -4,10 +4,15 @@ const taskList = document.getElementById('taskList');
 const startDateInput = document.getElementById('startDate');
 const taskStatusSelect = document.getElementById('taskStatus');
 const addBtn = document.getElementById('addBtn');
-const cancelBtn = document.getElementById('cancelBtn');
 const confirmModal = document.getElementById('confirmModal');
 const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
 const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+const editModal = document.getElementById('editModal');
+const editTitle = document.getElementById('editTitle');
+const editStartDate = document.getElementById('editStartDate');
+const editStatus = document.getElementById('editStatus');
+const saveEditBtn = document.getElementById('saveEditBtn');
+const cancelEditBtn = document.getElementById('cancelEditBtn');
 
 let tasks = [];
 let nextId = 1;
@@ -40,24 +45,39 @@ function clearForm() {
   taskInput.focus();
 }
 
-function exitEditMode() {
-  editingTaskId = null;
-  addBtn.textContent = 'Add';
-  cancelBtn.style.display = 'none';
-  clearForm();
-}
-
-function startEditMode(id) {
+function showEditModal(id) {
   const task = tasks.find(t => t.id === id);
   if (!task) return;
 
   editingTaskId = id;
-  taskInput.value = task.title;
-  startDateInput.value = task.startDate || '';
-  taskStatusSelect.value = task.status;
-  addBtn.textContent = 'Save';
-  cancelBtn.style.display = '';
-  taskInput.focus();
+  editTitle.value = task.title;
+  editStartDate.value = task.startDate || '';
+  editStatus.value = task.status;
+  editModal.style.display = 'flex';
+  editTitle.focus();
+}
+
+function hideEditModal() {
+  editingTaskId = null;
+  editModal.style.display = 'none';
+}
+
+function saveEdit() {
+  if (editingTaskId === null) return;
+  
+  const title = editTitle.value.trim();
+  if (!title) return;
+
+  const task = tasks.find(t => t.id === editingTaskId);
+  if (task) {
+    task.title = title;
+    task.startDate = editStartDate.value || null;
+    task.status = editStatus.value;
+  }
+  
+  saveState();
+  renderTasks();
+  hideEditModal();
 }
 
 function addTask(e) {
@@ -68,28 +88,16 @@ function addTask(e) {
 
   const startDate = startDateInput.value || null;
 
-  if (editingTaskId !== null) {
-    const task = tasks.find(t => t.id === editingTaskId);
-    if (task) {
-      task.title = title;
-      task.startDate = startDate;
-      task.status = taskStatusSelect.value;
-    }
-    saveState();
-    renderTasks();
-    exitEditMode();
-  } else {
-    tasks.push({
-      id: nextId++,
-      title,
-      startDate,
-      status: taskStatusSelect.value
-    });
+  tasks.push({
+    id: nextId++,
+    title,
+    startDate,
+    status: taskStatusSelect.value
+  });
 
-    saveState();
-    renderTasks();
-    clearForm();
-  }
+  saveState();
+  renderTasks();
+  clearForm();
 }
 
 function deleteTask(id) {
@@ -101,7 +109,7 @@ function confirmDelete() {
   if (pendingDeleteId === null) return;
   tasks = tasks.filter(task => task.id !== pendingDeleteId);
   if (editingTaskId === pendingDeleteId) {
-    exitEditMode();
+    hideEditModal();
   }
   pendingDeleteId = null;
   confirmModal.style.display = 'none';
@@ -147,7 +155,7 @@ function renderTasks() {
     const editBtn = document.createElement('button');
     editBtn.textContent = 'Edit';
     editBtn.className = 'edit-btn';
-    editBtn.addEventListener('click', () => startEditMode(task.id));
+    editBtn.addEventListener('click', () => showEditModal(task.id));
     actionsDiv.appendChild(editBtn);
 
     const deleteBtn = document.createElement('button');
@@ -163,9 +171,10 @@ function renderTasks() {
 }
 
 taskForm.addEventListener('submit', addTask);
-cancelBtn.addEventListener('click', exitEditMode);
 confirmDeleteBtn.addEventListener('click', confirmDelete);
 cancelDeleteBtn.addEventListener('click', cancelDelete);
+saveEditBtn.addEventListener('click', saveEdit);
+cancelEditBtn.addEventListener('click', hideEditModal);
 
 loadState();
 renderTasks();

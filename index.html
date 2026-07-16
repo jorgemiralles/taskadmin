@@ -20,7 +20,6 @@
         </select>
       </div>
       <button id="addBtn" type="submit">Add</button>
-      <button id="cancelBtn" type="button" class="cancel-btn" style="display:none">Cancel</button>
     </form>
     <ul id="taskList"></ul>
   </div>
@@ -30,6 +29,21 @@
       <div class="modal-actions">
         <button id="confirmDeleteBtn" class="confirm-delete-btn">Confirm</button>
         <button id="cancelDeleteBtn" class="cancel-delete-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <div id="editModal" class="modal-overlay" style="display:none">
+    <div class="modal-content">
+      <input type="text" id="editTitle" placeholder="Enter task title" aria-label="Task title">
+      <input type="date" id="editStartDate" aria-label="Start date">
+      <select id="editStatus" aria-label="Task status">
+        <option value="pending">Pending</option>
+        <option value="in-progress">In Progress</option>
+        <option value="completed">Completed</option>
+      </select>
+      <div class="modal-actions">
+        <button id="saveEditBtn" class="save-edit-btn">Save</button>
+        <button id="cancelEditBtn" class="cancel-edit-btn">Cancel</button>
       </div>
     </div>
   </div>
