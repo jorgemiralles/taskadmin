@@ -320,20 +320,37 @@ test.describe('Task Manager', () => {
   });
 
   test('clears all inputs after adding task', async ({ page }) => {
+    const today = new Date().toISOString().split('T')[0];
     await page.fill('#taskInput', 'Clear test');
     await page.fill('#startDate', '2026-07-01');
     await page.selectOption('#taskStatus', 'completed');
     await page.click('#addBtn');
 
     await expect(page.locator('#taskInput')).toHaveValue('');
-    await expect(page.locator('#startDate')).toHaveValue('');
+    await expect(page.locator('#startDate')).toHaveValue(today);
     await expect(page.locator('#taskStatus')).toHaveValue('pending');
   });
 
-  test('does not show dates when not provided', async ({ page }) => {
-    await page.fill('#taskInput', 'No dates task');
+  test('date input defaults to today on page load', async ({ page }) => {
+    const today = new Date().toISOString().split('T')[0];
+    await expect(page.locator('#startDate')).toHaveValue(today);
+  });
+
+  test('adds a task with default today date', async ({ page }) => {
+    const today = new Date().toISOString().split('T')[0];
+    await page.fill('#taskInput', 'Task with today');
     await page.click('#addBtn');
 
-    await expect(page.locator('.task-date')).toHaveCount(0);
+    await expect(page.locator('#taskList li')).toHaveCount(1);
+    await expect(page.locator('.task-date').first()).toContainText(`Start: ${today}`);
+  });
+
+  test('date input resets to today after adding task', async ({ page }) => {
+    const today = new Date().toISOString().split('T')[0];
+    await page.fill('#taskInput', 'Test task');
+    await page.fill('#startDate', '2026-01-01');
+    await page.click('#addBtn');
+
+    await expect(page.locator('#startDate')).toHaveValue(today);
   });
 });

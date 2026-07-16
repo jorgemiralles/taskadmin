@@ -8,8 +8,9 @@ Feature: Task Management
     When the user creates a task with title "Buy groceries"
     Then the task "Buy groceries" should be added to the task list
     And the task "Buy groceries" should have status "pending"
+    And the task "Buy groceries" should have today's date as start date
 
-  Scenario: Create a task with start date and status
+  Scenario: Create a task with custom start date
     Given the user has no tasks
     When the user creates a task with title "Project report" start date "2026-07-01" and status "completed"
     Then the task "Project report" should be added to the task list

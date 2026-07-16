@@ -19,6 +19,14 @@ let nextId = 1;
 let editingTaskId = null;
 let pendingDeleteId = null;
 
+function getTodayDate() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function loadState() {
   try {
     tasks = JSON.parse(localStorage.getItem('tasks')) || [];
@@ -40,7 +48,7 @@ function saveState() {
 
 function clearForm() {
   taskInput.value = '';
-  startDateInput.value = '';
+  startDateInput.value = getTodayDate();
   taskStatusSelect.value = 'pending';
   taskInput.focus();
 }
@@ -178,3 +186,4 @@ cancelEditBtn.addEventListener('click', hideEditModal);
 
 loadState();
 renderTasks();
+startDateInput.value = getTodayDate();

@@ -47,11 +47,12 @@ const tasks = []      // array to store tasks
 
 ### 1. Create Task
 - User types a task title in the input field
-- User optionally selects a start date
+- Start date defaults to today's date
+- User can modify the start date if desired
 - User selects a task status (defaults to "pending")
 - User clicks "Add" button or presses Enter
 - Task is added to the list below
-- All inputs are cleared after adding
+- All inputs are cleared after adding, with start date reset to today
 
 ### 2. List Tasks
 - Tasks displayed as `<li>` items in the `<ul>`
