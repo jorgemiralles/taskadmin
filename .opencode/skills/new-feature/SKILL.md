@@ -59,11 +59,19 @@ Update or add E2E tests in `tests/tasks.spec.js`.
 - Ensure all tests pass by running `CHROMIUM_PATH=/usr/bin/chromium-browser npm test`.
 - Restart darkhttpd before running tests: `kill -9 $(pgrep darkhttpd) 2>/dev/null; sleep 1; darkhttpd /home/taskadmin --port 8080 --daemon`.
 
-## Step 5: Commit
+## Step 5: Ask Before Merge
 
-After all steps are complete and tests pass:
+After committing, **ask the user** whether they want to merge and push. Do not merge or push without explicit confirmation.
 
-- Stage changed files.
-- Commit with a conventional commit message: `feat: <description>`.
+## Step 6: Merge & Push (only when user confirms)
+
+```bash
+git checkout main
+git merge feature/<feature-name>
+git push
+```
+
+## Commit convention
+
 - Commit message format: `type(scope): description`.
 - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`.

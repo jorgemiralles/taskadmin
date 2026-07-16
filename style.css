@@ -29,40 +29,39 @@ h1 {
 
 #taskForm {
   display: flex;
+  flex-direction: column;
   gap: 10px;
   margin-bottom: 20px;
 }
 
+.form-row {
+  display: flex;
+  gap: 10px;
+}
+
 #taskInput {
   flex: 1;
-  min-width: 0;
-  padding: 10px;
+  padding: 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 #startDate {
   width: 150px;
-  padding: 10px;
+  padding: 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 16px;
 }
 
-#addBtn {
-  width: 80px;
-  padding: 10px 0;
-  background: #4CAF50;
-  color: white;
-  border: none;
+select {
+  padding: 12px;
+  border: 1px solid #ddd;
   border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-#addBtn:hover {
-  background: #45a049;
+  font-size: 16px;
+  background: white;
+  width: 150px;
 }
 
 button {
@@ -169,11 +168,4 @@ li:last-child {
   color: #2e7d32;
 }
 
-select {
-  width: 140px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-  background: white;
-}
+

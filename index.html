@@ -11,12 +11,14 @@
     <h1>Task Manager</h1>
     <form id="taskForm">
       <input type="text" id="taskInput" placeholder="Enter task title" aria-label="Task title">
-      <input type="date" id="startDate" aria-label="Start date">
-      <select id="taskStatus" aria-label="Task status">
-        <option value="pending">Pending</option>
-        <option value="in-progress">In Progress</option>
-        <option value="completed">Completed</option>
-      </select>
+      <div class="form-row">
+        <input type="date" id="startDate" aria-label="Start date">
+        <select id="taskStatus" aria-label="Task status">
+          <option value="pending">Pending</option>
+          <option value="in-progress">In Progress</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
       <button id="addBtn" type="submit">Add</button>
       <button id="cancelBtn" type="button" class="cancel-btn" style="display:none">Cancel</button>
     </form>

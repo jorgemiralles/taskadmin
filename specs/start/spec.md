@@ -27,10 +27,11 @@ const tasks = []      // array to store tasks
 
 ```html
 - <h1> page title
-- <input> for task title
-- <input type="date"> for start date
-- <select> for task status (pending, in-progress, completed)
-- <button> to add task (text changes to "Save" when editing)
+- <input> for task title (full width)
+- <div class="form-row"> containing:
+  - <input type="date"> for start date
+  - <select> for task status (pending, in-progress, completed)
+- <button> to add task (text changes to "Save" when editing, sits below fields)
 - <button> to cancel editing (hidden by default)
 - <ul> task list container
 ```
@@ -71,7 +72,8 @@ const tasks = []      // array to store tasks
 - Clean, minimal design
 - Styled input and button
 - Task list with basic spacing
-- Form fields laid out in a single flex row (no wrapping)
+- Form is a vertical column: task title fills width, date+status on a second row, Add button below
+- Task title input has larger text (16px) and padding (12px)
 - Task info display with dates and status
 - Color-coded status badges (pending, in-progress, completed)
 - Styled select dropdown
