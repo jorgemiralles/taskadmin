@@ -9,12 +9,11 @@ Feature: Task Management
     Then the task "Buy groceries" should be added to the task list
     And the task "Buy groceries" should have status "pending"
 
-  Scenario: Create a task with dates and status
+  Scenario: Create a task with start date and status
     Given the user has no tasks
-    When the user creates a task with title "Project report" start date "2026-07-01" end date "2026-07-15" and status "completed"
+    When the user creates a task with title "Project report" start date "2026-07-01" and status "completed"
     Then the task "Project report" should be added to the task list
     And the task "Project report" should have start date "2026-07-01"
-    And the task "Project report" should have end date "2026-07-15"
     And the task "Project report" should have status "completed"
 
   Scenario: List all tasks
@@ -46,11 +45,10 @@ Feature: Task Management
     When the user edits the task "Buy groceries" to status "completed"
     Then the task "Buy groceries" should have status "completed"
 
-  Scenario: Edit a task dates
+  Scenario: Edit a task start date
     Given the user has a task "Project report" with status "pending"
-    When the user edits the task "Project report" with start date "2026-08-01" and end date "2026-08-31"
+    When the user edits the task "Project report" with start date "2026-08-01"
     Then the task "Project report" should have start date "2026-08-01"
-    And the task "Project report" should have end date "2026-08-31"
 
   Scenario: Cancel editing a task
     Given the user has a task "Buy groceries" with status "pending"

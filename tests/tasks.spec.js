@@ -20,7 +20,6 @@ test.describe('Task Manager', () => {
     await expect(page.locator('#taskInput')).toBeVisible();
     await expect(page.locator('#addBtn')).toBeVisible();
     await expect(page.locator('#startDate')).toBeVisible();
-    await expect(page.locator('#endDate')).toBeVisible();
     await expect(page.locator('#taskStatus')).toBeVisible();
   });
 
@@ -140,7 +139,6 @@ test.describe('Task Manager', () => {
   test('edit button populates form with task data', async ({ page }) => {
     await page.fill('#taskInput', 'Original task');
     await page.fill('#startDate', '2026-07-01');
-    await page.fill('#endDate', '2026-07-15');
     await page.selectOption('#taskStatus', 'in-progress');
     await page.click('#addBtn');
 
@@ -148,7 +146,6 @@ test.describe('Task Manager', () => {
 
     await expect(page.locator('#taskInput')).toHaveValue('Original task');
     await expect(page.locator('#startDate')).toHaveValue('2026-07-01');
-    await expect(page.locator('#endDate')).toHaveValue('2026-07-15');
     await expect(page.locator('#taskStatus')).toHaveValue('in-progress');
     await expect(page.locator('#addBtn')).toHaveText('Save');
     await expect(page.locator('#cancelBtn')).toBeVisible();
@@ -179,17 +176,15 @@ test.describe('Task Manager', () => {
     await expect(page.locator('.status-completed')).toHaveCount(1);
   });
 
-  test('saves edited task dates', async ({ page }) => {
+  test('saves edited task start date', async ({ page }) => {
     await page.fill('#taskInput', 'Dated task');
     await page.click('#addBtn');
 
     await page.locator('.edit-btn').first().click();
     await page.fill('#startDate', '2026-08-01');
-    await page.fill('#endDate', '2026-08-31');
     await page.click('#addBtn');
 
     await expect(page.locator('.task-date').first()).toContainText('Start: 2026-08-01');
-    await expect(page.locator('.task-date').nth(1)).toContainText('End: 2026-08-31');
   });
 
   test('cancel exits edit mode without changes', async ({ page }) => {
@@ -261,41 +256,35 @@ test.describe('Task Manager', () => {
     await expect(page.locator('.status-completed')).toHaveCount(1);
   });
 
-  test('adds task with start and end dates', async ({ page }) => {
+  test('adds task with start date', async ({ page }) => {
     await page.fill('#taskInput', 'Dated task');
     await page.fill('#startDate', '2026-07-01');
-    await page.fill('#endDate', '2026-07-15');
     await page.click('#addBtn');
 
-    await expect(page.locator('.task-date')).toHaveCount(2);
+    await expect(page.locator('.task-date')).toHaveCount(1);
     await expect(page.locator('.task-date').first()).toContainText('Start: 2026-07-01');
-    await expect(page.locator('.task-date').nth(1)).toContainText('End: 2026-07-15');
   });
 
   test('adds task with all fields', async ({ page }) => {
     await page.fill('#taskInput', 'Full task');
     await page.fill('#startDate', '2026-08-01');
-    await page.fill('#endDate', '2026-08-31');
     await page.selectOption('#taskStatus', 'in-progress');
     await page.click('#addBtn');
 
     await expect(page.locator('#taskList li')).toHaveCount(1);
     await expect(page.locator('.task-title').first()).toHaveText('Full task');
     await expect(page.locator('.task-date').first()).toContainText('Start: 2026-08-01');
-    await expect(page.locator('.task-date').nth(1)).toContainText('End: 2026-08-31');
     await expect(page.locator('.task-status').first()).toHaveText('Status: in-progress');
   });
 
   test('clears all inputs after adding task', async ({ page }) => {
     await page.fill('#taskInput', 'Clear test');
     await page.fill('#startDate', '2026-07-01');
-    await page.fill('#endDate', '2026-07-15');
     await page.selectOption('#taskStatus', 'completed');
     await page.click('#addBtn');
 
     await expect(page.locator('#taskInput')).toHaveValue('');
     await expect(page.locator('#startDate')).toHaveValue('');
-    await expect(page.locator('#endDate')).toHaveValue('');
     await expect(page.locator('#taskStatus')).toHaveValue('pending');
   });
 

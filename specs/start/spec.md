@@ -11,7 +11,6 @@ const task = {
   id: Number,         // auto-incremented id
   title: String,      // task title
   startDate: String,  // start date (YYYY-MM-DD) or null
-  endDate: String,    // end date (YYYY-MM-DD) or null
   status: String      // "pending" | "in-progress" | "completed"
 }
 
@@ -30,7 +29,6 @@ const tasks = []      // array to store tasks
 - <h1> page title
 - <input> for task title
 - <input type="date"> for start date
-- <input type="date"> for end date
 - <select> for task status (pending, in-progress, completed)
 - <button> to add task (text changes to "Save" when editing)
 - <button> to cancel editing (hidden by default)
@@ -41,7 +39,7 @@ const tasks = []      // array to store tasks
 
 ### 1. Create Task
 - User types a task title in the input field
-- User optionally selects a start date and end date
+- User optionally selects a start date
 - User selects a task status (defaults to "pending")
 - User clicks "Add" button or presses Enter
 - Task is added to the list below
@@ -49,7 +47,7 @@ const tasks = []      // array to store tasks
 
 ### 2. List Tasks
 - Tasks displayed as `<li>` items in the `<ul>`
-- Each task shows its title, start date, end date, and status badge
+- Each task shows its title, start date, and status badge
 - Status badges are color-coded: pending (yellow), in-progress (blue), completed (green)
 
 ### 3. Delete Task
@@ -82,12 +80,12 @@ const tasks = []      // array to store tasks
 
 ## JavaScript (app.js)
 
-- Select DOM elements (input, date inputs, select, button, cancel button, list)
+- Select DOM elements (input, date input, select, button, cancel button, list)
 - Add click/keypress event listener
-- On submit: create task object with title, startDate, endDate, status
+- On submit: create task object with title, startDate, status
 - On submit: create `<li>` element with task info, append to `<ul>`, clear inputs
 - Store tasks in localStorage
-- Render tasks with title, dates, status badge, edit button, and delete button
+- Render tasks with title, date, status badge, edit button, and delete button
 - Delete task from list and localStorage
 - Track editingTaskId (null when not editing)
 - On edit click: populate form with task data, switch to edit mode

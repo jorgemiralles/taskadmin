@@ -2,7 +2,6 @@ const taskForm = document.getElementById('taskForm');
 const taskInput = document.getElementById('taskInput');
 const taskList = document.getElementById('taskList');
 const startDateInput = document.getElementById('startDate');
-const endDateInput = document.getElementById('endDate');
 const taskStatusSelect = document.getElementById('taskStatus');
 const addBtn = document.getElementById('addBtn');
 const cancelBtn = document.getElementById('cancelBtn');
@@ -33,7 +32,6 @@ function saveState() {
 function clearForm() {
   taskInput.value = '';
   startDateInput.value = '';
-  endDateInput.value = '';
   taskStatusSelect.value = 'pending';
   taskInput.focus();
 }
@@ -52,7 +50,6 @@ function startEditMode(id) {
   editingTaskId = id;
   taskInput.value = task.title;
   startDateInput.value = task.startDate || '';
-  endDateInput.value = task.endDate || '';
   taskStatusSelect.value = task.status;
   addBtn.textContent = 'Save';
   cancelBtn.style.display = '';
@@ -66,19 +63,12 @@ function addTask(e) {
   if (!title) return;
 
   const startDate = startDateInput.value || null;
-  const endDate = endDateInput.value || null;
-
-  if (startDate && endDate && endDate < startDate) {
-    alert('End date must be after start date.');
-    return;
-  }
 
   if (editingTaskId !== null) {
     const task = tasks.find(t => t.id === editingTaskId);
     if (task) {
       task.title = title;
       task.startDate = startDate;
-      task.endDate = endDate;
       task.status = taskStatusSelect.value;
     }
     saveState();
@@ -89,7 +79,6 @@ function addTask(e) {
       id: nextId++,
       title,
       startDate,
-      endDate,
       status: taskStatusSelect.value
     });
 
@@ -126,13 +115,6 @@ function renderTasks() {
       startSpan.textContent = `Start: ${task.startDate}`;
       startSpan.className = 'task-date';
       taskInfo.appendChild(startSpan);
-    }
-
-    if (task.endDate) {
-      const endSpan = document.createElement('span');
-      endSpan.textContent = `End: ${task.endDate}`;
-      endSpan.className = 'task-date';
-      taskInfo.appendChild(endSpan);
     }
 
     const statusSpan = document.createElement('span');
