@@ -26,12 +26,21 @@
 ## E2E Testing
 
 - **Framework:** Playwright
-- **Run:** `npm test`
+- **Run:** `CHROMIUM_PATH=/usr/bin/chromium-browser npm test`
 - **Browser:** System Chromium (`/usr/bin/chromium-browser`)
 - **Server:** darkhttpd (auto-started by Playwright on port 8080)
 - **Install deps:** `apk add chromium` (required on Alpine)
-- **Config:** `playwright.config.js` — sets `executablePath` for Alpine compatibility
+- **Config:** `playwright.config.js` — uses `CHROMIUM_PATH` env var for Alpine compatibility
 - **Tests:** `tests/tasks.spec.js`
+
+## CI/CD
+
+- **Platform:** GitHub Actions
+- **Workflow:** `.github/workflows/e2e.yml`
+- **Triggers:** Push/PR to `main`
+- **Runner:** `ubuntu-latest`
+- **Steps:** Checkout → Node.js 20 → darkhttpd (`.deb`) → `npm ci` → Playwright Chromium + deps → `npm test`
+- **Artifacts:** `test-results/` uploaded (14-day retention)
 
 ## Git
 

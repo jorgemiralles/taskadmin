@@ -1,5 +1,7 @@
 const { defineConfig } = require('@playwright/test');
 
+const chromiumPath = process.env.CHROMIUM_PATH || undefined;
+
 module.exports = defineConfig({
   testDir: './tests',
   timeout: 30000,
@@ -17,9 +19,7 @@ module.exports = defineConfig({
       name: 'chromium',
       use: {
         browserName: 'chromium',
-        launchOptions: {
-          executablePath: '/usr/bin/chromium-browser',
-        },
+        launchOptions: chromiumPath ? { executablePath: chromiumPath } : {},
       },
     },
   ],
