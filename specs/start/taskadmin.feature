@@ -25,14 +25,27 @@ Feature: Task Management
     Then the user should see 2 tasks
     And the tasks should include "Buy groceries" and "Read a book"
 
-  Scenario: Delete a task
+  Scenario: Delete a task after confirmation
     Given the user has the following tasks:
       | title            | status     |
       | Buy groceries    | pending    |
       | Read a book      | in-progress |
-    When the user deletes the task "Buy groceries"
+    When the user clicks delete on the task "Buy groceries"
+    Then a confirmation popup should appear asking to confirm deletion
+    When the user confirms the deletion
     Then the user should see 1 task
     And the tasks should include "Read a book"
+
+  Scenario: Cancel delete from confirmation popup
+    Given the user has the following tasks:
+      | title            | status     |
+      | Buy groceries    | pending    |
+      | Read a book      | in-progress |
+    When the user clicks delete on the task "Buy groceries"
+    Then a confirmation popup should appear asking to confirm deletion
+    When the user cancels the deletion
+    Then the user should see 2 tasks
+    And the tasks should include "Buy groceries" and "Read a book"
 
   Scenario: Edit a task title
     Given the user has a task "Buy groceries" with status "pending"

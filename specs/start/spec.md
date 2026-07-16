@@ -34,6 +34,8 @@ const tasks = []      // array to store tasks
 - <button> to add task (text changes to "Save" when editing, sits below fields)
 - <button> to cancel editing (hidden by default)
 - <ul> task list container
+- <div id="confirmModal"> confirmation popup overlay
+  - <div class="modal-content"> containing message and Confirm/Cancel buttons
 ```
 
 ## Features
@@ -53,9 +55,10 @@ const tasks = []      // array to store tasks
 
 ### 3. Delete Task
 - Each task has a delete button
-- User clicks delete button to remove task
-- Task is removed from the list
-- Updated list persists to localStorage
+- User clicks delete button to trigger confirmation
+- A confirmation popup appears asking the user to confirm or cancel
+- On confirm: task is removed from the list and localStorage
+- On cancel: popup closes and no changes are made
 
 ### 4. Edit Task
 - Each task has an edit button
@@ -79,16 +82,21 @@ const tasks = []      // array to store tasks
 - Styled select dropdown
 - Edit button (blue) on each task
 - Cancel button (gray, hidden by default) in form
+- Modal overlay with semi-transparent background
+- Modal content box with white background, padding, border-radius, and shadow
+- Confirm button (red) and Cancel button (gray) in modal
 
 ## JavaScript (app.js)
 
-- Select DOM elements (input, date input, select, button, cancel button, list)
+- Select DOM elements (input, date input, select, button, cancel button, list, modal, confirm/cancel buttons)
 - Add click/keypress event listener
 - On submit: create task object with title, startDate, status
 - On submit: create `<li>` element with task info, append to `<ul>`, clear inputs
 - Store tasks in localStorage
 - Render tasks with title, date, status badge, edit button, and delete button
-- Delete task from list and localStorage
+- On delete click: show confirmation modal, track pending delete task id
+- On confirm: remove task from array and localStorage, re-render
+- On cancel: hide modal, clear pending delete id
 - Track editingTaskId (null when not editing)
 - On edit click: populate form with task data, switch to edit mode
 - On save: update task in array, exit edit mode, re-render

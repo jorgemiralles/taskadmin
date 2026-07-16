@@ -78,16 +78,21 @@ test.describe('Task Manager', () => {
     await expect(page.locator('#taskList li').nth(2)).toContainText('Task 3');
   });
 
-  test('deletes a task', async ({ page }) => {
+  test('deletes a task after confirmation', async ({ page }) => {
     await page.fill('#taskInput', 'Task to delete');
     await page.click('#addBtn');
     await expect(page.locator('#taskList li')).toHaveCount(1);
 
     await page.click('.delete-btn');
+    await expect(page.locator('#confirmModal')).toBeVisible();
+    await expect(page.locator('.modal-content p')).toHaveText('Are you sure you want to delete this task?');
+
+    await page.click('#confirmDeleteBtn');
     await expect(page.locator('#taskList li')).toHaveCount(0);
+    await expect(page.locator('#confirmModal')).not.toBeVisible();
   });
 
-  test('deletes correct task from multiple', async ({ page }) => {
+  test('deletes correct task from multiple after confirmation', async ({ page }) => {
     await page.fill('#taskInput', 'Keep');
     await page.click('#addBtn');
 
@@ -100,9 +105,46 @@ test.describe('Task Manager', () => {
     await expect(page.locator('#taskList li')).toHaveCount(3);
 
     await page.locator('#taskList li', { hasText: 'Remove' }).locator('.delete-btn').click();
+    await expect(page.locator('#confirmModal')).toBeVisible();
+
+    await page.click('#confirmDeleteBtn');
     await expect(page.locator('#taskList li')).toHaveCount(2);
     await expect(page.locator('#taskList li').nth(0)).toContainText('Keep');
     await expect(page.locator('#taskList li').nth(1)).toContainText('Keep too');
+  });
+
+  test('cancels delete from confirmation popup', async ({ page }) => {
+    await page.fill('#taskInput', 'Task to keep');
+    await page.click('#addBtn');
+    await expect(page.locator('#taskList li')).toHaveCount(1);
+
+    await page.click('.delete-btn');
+    await expect(page.locator('#confirmModal')).toBeVisible();
+
+    await page.click('#cancelDeleteBtn');
+    await expect(page.locator('#confirmModal')).not.toBeVisible();
+    await expect(page.locator('#taskList li')).toHaveCount(1);
+    await expect(page.locator('#taskList li').first()).toContainText('Task to keep');
+  });
+
+  test('cancel delete preserves all tasks', async ({ page }) => {
+    await page.fill('#taskInput', 'Task A');
+    await page.click('#addBtn');
+
+    await page.fill('#taskInput', 'Task B');
+    await page.click('#addBtn');
+
+    await page.locator('#taskList li', { hasText: 'Task A' }).locator('.delete-btn').click();
+    await expect(page.locator('#confirmModal')).toBeVisible();
+
+    await page.click('#cancelDeleteBtn');
+    await expect(page.locator('#taskList li')).toHaveCount(2);
+    await expect(page.locator('#taskList li').nth(0)).toContainText('Task A');
+    await expect(page.locator('#taskList li').nth(1)).toContainText('Task B');
+  });
+
+  test('confirm modal is hidden by default', async ({ page }) => {
+    await expect(page.locator('#confirmModal')).not.toBeVisible();
   });
 
   test('persists tasks in localStorage', async ({ page }) => {

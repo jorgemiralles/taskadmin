@@ -5,10 +5,14 @@ const startDateInput = document.getElementById('startDate');
 const taskStatusSelect = document.getElementById('taskStatus');
 const addBtn = document.getElementById('addBtn');
 const cancelBtn = document.getElementById('cancelBtn');
+const confirmModal = document.getElementById('confirmModal');
+const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
 
 let tasks = [];
 let nextId = 1;
 let editingTaskId = null;
+let pendingDeleteId = null;
 
 function loadState() {
   try {
@@ -89,12 +93,25 @@ function addTask(e) {
 }
 
 function deleteTask(id) {
-  tasks = tasks.filter(task => task.id !== id);
-  if (editingTaskId === id) {
+  pendingDeleteId = id;
+  confirmModal.style.display = 'flex';
+}
+
+function confirmDelete() {
+  if (pendingDeleteId === null) return;
+  tasks = tasks.filter(task => task.id !== pendingDeleteId);
+  if (editingTaskId === pendingDeleteId) {
     exitEditMode();
   }
+  pendingDeleteId = null;
+  confirmModal.style.display = 'none';
   saveState();
   renderTasks();
+}
+
+function cancelDelete() {
+  pendingDeleteId = null;
+  confirmModal.style.display = 'none';
 }
 
 function renderTasks() {
@@ -147,6 +164,8 @@ function renderTasks() {
 
 taskForm.addEventListener('submit', addTask);
 cancelBtn.addEventListener('click', exitEditMode);
+confirmDeleteBtn.addEventListener('click', confirmDelete);
+cancelDeleteBtn.addEventListener('click', cancelDelete);
 
 loadState();
 renderTasks();
