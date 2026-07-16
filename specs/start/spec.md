@@ -32,7 +32,8 @@ const tasks = []      // array to store tasks
 - <input type="date"> for start date
 - <input type="date"> for end date
 - <select> for task status (pending, in-progress, completed)
-- <button> to add task
+- <button> to add task (text changes to "Save" when editing)
+- <button> to cancel editing (hidden by default)
 - <ul> task list container
 ```
 
@@ -57,6 +58,15 @@ const tasks = []      // array to store tasks
 - Task is removed from the list
 - Updated list persists to localStorage
 
+### 4. Edit Task
+- Each task has an edit button
+- User clicks edit button to enter edit mode
+- Form fields populate with the task's current values
+- Add button text changes to "Save", cancel button becomes visible
+- User modifies fields and clicks "Save" to update the task
+- User clicks "Cancel" to exit edit mode without changes
+- After saving, form clears and returns to add mode
+
 ## CSS Styling
 
 - Centered layout with max-width
@@ -67,13 +77,19 @@ const tasks = []      // array to store tasks
 - Task info display with dates and status
 - Color-coded status badges (pending, in-progress, completed)
 - Styled select dropdown
+- Edit button (blue) on each task
+- Cancel button (gray, hidden by default) in form
 
 ## JavaScript (app.js)
 
-- Select DOM elements (input, date inputs, select, button, list)
+- Select DOM elements (input, date inputs, select, button, cancel button, list)
 - Add click/keypress event listener
 - On submit: create task object with title, startDate, endDate, status
 - On submit: create `<li>` element with task info, append to `<ul>`, clear inputs
 - Store tasks in localStorage
-- Render tasks with title, dates, and status badge
+- Render tasks with title, dates, status badge, edit button, and delete button
 - Delete task from list and localStorage
+- Track editingTaskId (null when not editing)
+- On edit click: populate form with task data, switch to edit mode
+- On save: update task in array, exit edit mode, re-render
+- On cancel: clear form, exit edit mode

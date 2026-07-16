@@ -126,6 +126,114 @@ test.describe('Task Manager', () => {
     await expect(deleteButtons).toHaveCount(2);
   });
 
+  test('each task has an edit button', async ({ page }) => {
+    await page.fill('#taskInput', 'Task A');
+    await page.click('#addBtn');
+
+    await page.fill('#taskInput', 'Task B');
+    await page.click('#addBtn');
+
+    const editButtons = page.locator('.edit-btn');
+    await expect(editButtons).toHaveCount(2);
+  });
+
+  test('edit button populates form with task data', async ({ page }) => {
+    await page.fill('#taskInput', 'Original task');
+    await page.fill('#startDate', '2026-07-01');
+    await page.fill('#endDate', '2026-07-15');
+    await page.selectOption('#taskStatus', 'in-progress');
+    await page.click('#addBtn');
+
+    await page.locator('.edit-btn').first().click();
+
+    await expect(page.locator('#taskInput')).toHaveValue('Original task');
+    await expect(page.locator('#startDate')).toHaveValue('2026-07-01');
+    await expect(page.locator('#endDate')).toHaveValue('2026-07-15');
+    await expect(page.locator('#taskStatus')).toHaveValue('in-progress');
+    await expect(page.locator('#addBtn')).toHaveText('Save');
+    await expect(page.locator('#cancelBtn')).toBeVisible();
+  });
+
+  test('saves edited task title', async ({ page }) => {
+    await page.fill('#taskInput', 'Buy groceries');
+    await page.click('#addBtn');
+
+    await page.locator('.edit-btn').first().click();
+    await page.fill('#taskInput', 'Buy organic groceries');
+    await page.click('#addBtn');
+
+    await expect(page.locator('.task-title').first()).toHaveText('Buy organic groceries');
+    await expect(page.locator('#addBtn')).toHaveText('Add');
+    await expect(page.locator('#cancelBtn')).not.toBeVisible();
+  });
+
+  test('saves edited task status', async ({ page }) => {
+    await page.fill('#taskInput', 'Task status');
+    await page.click('#addBtn');
+
+    await page.locator('.edit-btn').first().click();
+    await page.selectOption('#taskStatus', 'completed');
+    await page.click('#addBtn');
+
+    await expect(page.locator('.task-status').first()).toHaveText('Status: completed');
+    await expect(page.locator('.status-completed')).toHaveCount(1);
+  });
+
+  test('saves edited task dates', async ({ page }) => {
+    await page.fill('#taskInput', 'Dated task');
+    await page.click('#addBtn');
+
+    await page.locator('.edit-btn').first().click();
+    await page.fill('#startDate', '2026-08-01');
+    await page.fill('#endDate', '2026-08-31');
+    await page.click('#addBtn');
+
+    await expect(page.locator('.task-date').first()).toContainText('Start: 2026-08-01');
+    await expect(page.locator('.task-date').nth(1)).toContainText('End: 2026-08-31');
+  });
+
+  test('cancel exits edit mode without changes', async ({ page }) => {
+    await page.fill('#taskInput', 'Original');
+    await page.click('#addBtn');
+
+    await page.locator('.edit-btn').first().click();
+    await page.fill('#taskInput', 'Changed');
+    await page.click('#cancelBtn');
+
+    await expect(page.locator('.task-title').first()).toHaveText('Original');
+    await expect(page.locator('#addBtn')).toHaveText('Add');
+    await expect(page.locator('#cancelBtn')).not.toBeVisible();
+    await expect(page.locator('#taskInput')).toHaveValue('');
+  });
+
+  test('edit preserves other tasks', async ({ page }) => {
+    await page.fill('#taskInput', 'Task A');
+    await page.click('#addBtn');
+
+    await page.fill('#taskInput', 'Task B');
+    await page.click('#addBtn');
+
+    await page.locator('.edit-btn').first().click();
+    await page.fill('#taskInput', 'Task A edited');
+    await page.click('#addBtn');
+
+    await expect(page.locator('#taskList li')).toHaveCount(2);
+    await expect(page.locator('.task-title').first()).toHaveText('Task A edited');
+    await expect(page.locator('.task-title').nth(1)).toHaveText('Task B');
+  });
+
+  test('edit persists to localStorage', async ({ page }) => {
+    await page.fill('#taskInput', 'Persistent');
+    await page.click('#addBtn');
+
+    await page.locator('.edit-btn').first().click();
+    await page.fill('#taskInput', 'Persistent edited');
+    await page.click('#addBtn');
+
+    await page.reload();
+    await expect(page.locator('.task-title').first()).toHaveText('Persistent edited');
+  });
+
   test('new task has default pending status', async ({ page }) => {
     await page.fill('#taskInput', 'Default status task');
     await page.click('#addBtn');

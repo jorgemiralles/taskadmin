@@ -83,6 +83,29 @@ li:last-child {
   background: #d32f2f;
 }
 
+.edit-btn {
+  background: #2196F3;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.edit-btn:hover {
+  background: #1976D2;
+}
+
+.task-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.cancel-btn {
+  background: #9e9e9e;
+}
+
+.cancel-btn:hover {
+  background: #757575;
+}
+
 .task-info {
   display: flex;
   flex-direction: column;
