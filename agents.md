@@ -20,5 +20,5 @@
 - **Port:** 8080
 - **Bind:** 0.0.0.0 (accessible from host)
 - **Install:** `apk add darkhttpd`
-- **Run:** `darkhttpd /home/taskadmin -p 8080 --daemon`
+- **Run:** `darkhttpd /home/taskadmin --port 8080 --daemon`
 - **Access:** `http://localhost:8080` from Windows host
