@@ -11,6 +11,13 @@
     <h1>Task Manager</h1>
     <div class="input-group">
       <input type="text" id="taskInput" placeholder="Enter task title">
+      <input type="date" id="startDate">
+      <input type="date" id="endDate">
+      <select id="taskStatus">
+        <option value="pending">Pending</option>
+        <option value="in-progress">In Progress</option>
+        <option value="completed">Completed</option>
+      </select>
       <button id="addBtn">Add</button>
     </div>
     <ul id="taskList"></ul>
