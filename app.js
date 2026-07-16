@@ -1,41 +1,70 @@
+const taskForm = document.getElementById('taskForm');
 const taskInput = document.getElementById('taskInput');
-const addBtn = document.getElementById('addBtn');
 const taskList = document.getElementById('taskList');
 const startDateInput = document.getElementById('startDate');
 const endDateInput = document.getElementById('endDate');
 const taskStatusSelect = document.getElementById('taskStatus');
 
-let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-let nextId = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
+let tasks = [];
+let nextId = 1;
 
-function saveTasks() {
-  localStorage.setItem('tasks', JSON.stringify(tasks));
+function loadState() {
+  try {
+    tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    nextId = parseInt(localStorage.getItem('nextId'), 10) || 1;
+  } catch {
+    tasks = [];
+    nextId = 1;
+  }
 }
 
-function addTask() {
-  const title = taskInput.value.trim();
-  if (!title) return;
+function saveState() {
+  try {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+    localStorage.setItem('nextId', nextId.toString());
+  } catch {
+    // storage unavailable — state is lost on reload
+  }
+}
 
-  tasks.push({
-    id: nextId++,
-    title: title,
-    startDate: startDateInput.value || null,
-    endDate: endDateInput.value || null,
-    status: taskStatusSelect.value,
-    completed: false
-  });
-
-  saveTasks();
-  renderTasks();
+function clearForm() {
   taskInput.value = '';
   startDateInput.value = '';
   endDateInput.value = '';
   taskStatusSelect.value = 'pending';
+  taskInput.focus();
+}
+
+function addTask(e) {
+  e.preventDefault();
+
+  const title = taskInput.value.trim();
+  if (!title) return;
+
+  const startDate = startDateInput.value || null;
+  const endDate = endDateInput.value || null;
+
+  if (startDate && endDate && endDate < startDate) {
+    alert('End date must be after start date.');
+    return;
+  }
+
+  tasks.push({
+    id: nextId++,
+    title,
+    startDate,
+    endDate,
+    status: taskStatusSelect.value
+  });
+
+  saveState();
+  renderTasks();
+  clearForm();
 }
 
 function deleteTask(id) {
   tasks = tasks.filter(task => task.id !== id);
-  saveTasks();
+  saveState();
   renderTasks();
 }
 
@@ -83,10 +112,7 @@ function renderTasks() {
   });
 }
 
-addBtn.addEventListener('click', addTask);
+taskForm.addEventListener('submit', addTask);
 
-taskInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') addTask();
-});
-
+loadState();
 renderTasks();

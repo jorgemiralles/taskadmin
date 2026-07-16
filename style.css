@@ -27,7 +27,7 @@ h1 {
   color: #333;
 }
 
-.input-group {
+#taskForm {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
