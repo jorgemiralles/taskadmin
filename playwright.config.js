@@ -10,7 +10,7 @@ module.exports = defineConfig({
     headless: true,
   },
   webServer: {
-    command: 'darkhttpd /home/taskadmin --port 8080',
+    command: 'darkhttpd . --port 8080',
     port: 8080,
     reuseExistingServer: true,
   },
