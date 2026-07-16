@@ -9,10 +9,17 @@
 <body>
   <div class="container">
     <h1>Task Manager</h1>
-    <div class="input-group">
-      <input type="text" id="taskInput" placeholder="Enter task title">
-      <button id="addBtn">Add</button>
-    </div>
+    <form id="taskForm">
+      <input type="text" id="taskInput" placeholder="Enter task title" aria-label="Task title">
+      <input type="date" id="startDate" aria-label="Start date">
+      <input type="date" id="endDate" aria-label="End date">
+      <select id="taskStatus" aria-label="Task status">
+        <option value="pending">Pending</option>
+        <option value="in-progress">In Progress</option>
+        <option value="completed">Completed</option>
+      </select>
+      <button id="addBtn" type="submit">Add</button>
+    </form>
     <ul id="taskList"></ul>
   </div>
   <script src="app.js"></script>

@@ -20,7 +20,10 @@
 - **Port:** 8080
 - **Bind:** 0.0.0.0 (accessible from host)
 - **Install:** `apk add darkhttpd`
-- **Run:** `darkhttpd /home/taskadmin --port 8080 --daemon`
+- **Start:** `darkhttpd /home/taskadmin --port 8080 --daemon`
+- **Stop:** `kill -9 $(pgrep darkhttpd)`
+- **Restart:** `kill -9 $(pgrep darkhttpd); sleep 1; darkhttpd /home/taskadmin --port 8080 --daemon`
+- **Verify:** `wget -q -O - http://127.0.0.1:8080/`
 - **Access:** `http://localhost:8080` from Windows host
 
 ## E2E Testing
