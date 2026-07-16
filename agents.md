@@ -23,6 +23,16 @@
 - **Run:** `darkhttpd /home/taskadmin --port 8080 --daemon`
 - **Access:** `http://localhost:8080` from Windows host
 
+## E2E Testing
+
+- **Framework:** Playwright
+- **Run:** `npm test`
+- **Browser:** System Chromium (`/usr/bin/chromium-browser`)
+- **Server:** darkhttpd (auto-started by Playwright on port 8080)
+- **Install deps:** `apk add chromium` (required on Alpine)
+- **Config:** `playwright.config.js` — sets `executablePath` for Alpine compatibility
+- **Tests:** `tests/tasks.spec.js`
+
 ## Git
 
 - **Commit Convention:** [Conventional Commits](https://www.conventionalcommits.org/)
