@@ -49,6 +49,7 @@
   border-radius: 6px 6px 0 0;
   margin-bottom: 0;
   font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .status-pending-header {
@@ -73,6 +74,7 @@
   border-radius: 0 0 6px 6px;
   transition: background-color 0.2s;
   overflow-y: auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .kanban-zone.drag-over {
@@ -89,6 +91,7 @@
 .kanban-column .list-group-item {
   cursor: grab;
   user-select: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .kanban-column .list-group-item.dragging {
