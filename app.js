@@ -2,7 +2,6 @@ const taskForm = document.getElementById('taskForm');
 const taskInput = document.getElementById('taskInput');
 const taskList = document.getElementById('taskList');
 const startDateInput = document.getElementById('startDate');
-const taskStatusSelect = document.getElementById('taskStatus');
 const addBtn = document.getElementById('addBtn');
 const confirmModal = document.getElementById('confirmModal');
 const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
@@ -52,7 +51,6 @@ function saveState() {
 function clearForm() {
   taskInput.value = '';
   startDateInput.value = getTodayDate();
-  taskStatusSelect.value = 'pending';
   taskInput.focus();
 }
 
@@ -103,7 +101,7 @@ function addTask(e) {
     id: nextId++,
     title,
     startDate,
-    status: taskStatusSelect.value
+    status: 'pending'
   });
 
   saveState();

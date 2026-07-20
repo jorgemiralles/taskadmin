@@ -12,10 +12,14 @@ Feature: Task Management
 
   Scenario: Create a task with custom start date
     Given the user has no tasks
-    When the user creates a task with title "Project report" start date "2026-07-01" and status "completed"
+    When the user creates a task with title "Project report" and start date "2026-07-01"
     Then the task "Project report" should be added to the task list
     And the task "Project report" should have start date "2026-07-01"
-    And the task "Project report" should have status "completed"
+    And the task "Project report" should have status "pending"
+
+  Scenario: Add form does not show status field
+    Given the user is on the task manager page
+    Then the add task form should not contain a status field
 
   Scenario: List all tasks
     Given the user has the following tasks:

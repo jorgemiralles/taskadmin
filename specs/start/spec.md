@@ -32,7 +32,7 @@ const tasks = []      // array to store tasks
   - <input class="form-control mb-2"> for task title (full width)
   - <div class="row g-2 mb-2"> containing:
     - <div class="col"><input type="date" class="form-control"> for start date
-    - <div class="col"><select class="form-select"> for task status (pending, in-progress, completed)
+    - (no status field — status is always "pending" for new tasks)
   - <button class="btn btn-success w-100" type="submit"> to add task
 - <ul id="taskList" class="list-group"> task list container using Bootstrap list-group
 - <div id="confirmModal" class="modal"> using Bootstrap modal
@@ -58,9 +58,8 @@ const tasks = []      // array to store tasks
 - User types a task title in the input field
 - Start date defaults to today's date
 - User can modify the start date if desired
-- User selects a task status (defaults to "pending")
 - User clicks "Add" button or presses Enter
-- Task is added to the list below
+- Task is added with status always defaulting to "pending"
 - All inputs are cleared after adding, with start date reset to today
 
 ### 2. List Tasks
@@ -98,9 +97,9 @@ const tasks = []      // array to store tasks
 
 ## JavaScript (app.js)
 
-- Select DOM elements (input, date input, select, button, list, confirm modal, edit modal, edit form fields, save/cancel buttons)
+- Select DOM elements (input, date input, button, list, confirm modal, edit modal, edit form fields, save/cancel buttons)
 - Add click/keypress event listener for task creation
-- On submit: create task object with title, startDate, status
+- On submit: create task object with title, startDate, and status hardcoded to "pending"
 - On submit: create `<li>` element with task info, append to `<ul>`, clear inputs
 - Store tasks in localStorage
 - Render tasks with title, date, status badge, edit button, and delete button using Bootstrap list-group-item classes
