@@ -1,6 +1,5 @@
 const taskForm = document.getElementById('taskForm');
 const taskInput = document.getElementById('taskInput');
-const taskList = document.getElementById('taskList');
 const startDateInput = document.getElementById('startDate');
 const addBtn = document.getElementById('addBtn');
 const confirmModal = document.getElementById('confirmModal');
@@ -12,6 +11,14 @@ const editStartDate = document.getElementById('editStartDate');
 const editStatus = document.getElementById('editStatus');
 const saveEditBtn = document.getElementById('saveEditBtn');
 const cancelEditBtn = document.getElementById('cancelEditBtn');
+
+const pendingColumn = document.getElementById('pendingColumn');
+const inProgressColumn = document.getElementById('inProgressColumn');
+const completedColumn = document.getElementById('completedColumn');
+
+const pendingZone = pendingColumn.closest('.kanban-zone');
+const inProgressZone = inProgressColumn.closest('.kanban-zone');
+const completedZone = completedColumn.closest('.kanban-zone');
 
 let tasks = [];
 let nextId = 1;
@@ -73,7 +80,7 @@ function hideEditModal() {
 
 function saveEdit() {
   if (editingTaskId === null) return;
-  
+
   const title = editTitle.value.trim();
   if (!title) return;
 
@@ -83,7 +90,7 @@ function saveEdit() {
     task.startDate = editStartDate.value || null;
     task.status = editStatus.value;
   }
-  
+
   saveState();
   renderTasks();
   hideEditModal();
@@ -131,54 +138,113 @@ function cancelDelete() {
   confirmBootstrapModal.hide();
 }
 
+function createTaskElement(task) {
+  const li = document.createElement('li');
+  li.className = 'list-group-item d-flex justify-content-between align-items-center';
+  li.draggable = true;
+  li.dataset.taskId = task.id;
+
+  const taskInfo = document.createElement('div');
+  taskInfo.className = 'task-info';
+
+  const titleSpan = document.createElement('span');
+  titleSpan.textContent = task.title;
+  titleSpan.className = 'task-title';
+  taskInfo.appendChild(titleSpan);
+
+  if (task.startDate) {
+    const startSpan = document.createElement('span');
+    startSpan.textContent = `Start: ${task.startDate}`;
+    startSpan.className = 'task-date';
+    taskInfo.appendChild(startSpan);
+  }
+
+  li.appendChild(taskInfo);
+
+  const actionsDiv = document.createElement('div');
+  actionsDiv.className = 'task-actions';
+
+  const editBtn = document.createElement('button');
+  editBtn.textContent = 'Edit';
+  editBtn.className = 'btn btn-primary btn-sm';
+  editBtn.addEventListener('click', () => showEditModal(task.id));
+  actionsDiv.appendChild(editBtn);
+
+  const deleteBtn = document.createElement('button');
+  deleteBtn.textContent = 'Delete';
+  deleteBtn.className = 'btn btn-danger btn-sm';
+  deleteBtn.addEventListener('click', () => deleteTask(task.id));
+  actionsDiv.appendChild(deleteBtn);
+
+  li.appendChild(actionsDiv);
+
+  li.addEventListener('dragstart', handleDragStart);
+  li.addEventListener('dragend', handleDragEnd);
+
+  return li;
+}
+
 function renderTasks() {
-  taskList.innerHTML = '';
+  pendingColumn.innerHTML = '';
+  inProgressColumn.innerHTML = '';
+  completedColumn.innerHTML = '';
+
   tasks.forEach(task => {
-    const li = document.createElement('li');
-    li.className = 'list-group-item d-flex justify-content-between align-items-center';
-
-    const taskInfo = document.createElement('div');
-    taskInfo.className = 'task-info';
-
-    const titleSpan = document.createElement('span');
-    titleSpan.textContent = task.title;
-    titleSpan.className = 'task-title';
-    taskInfo.appendChild(titleSpan);
-
-    if (task.startDate) {
-      const startSpan = document.createElement('span');
-      startSpan.textContent = `Start: ${task.startDate}`;
-      startSpan.className = 'task-date';
-      taskInfo.appendChild(startSpan);
+    const li = createTaskElement(task);
+    switch (task.status) {
+      case 'in-progress':
+        inProgressColumn.appendChild(li);
+        break;
+      case 'completed':
+        completedColumn.appendChild(li);
+        break;
+      default:
+        pendingColumn.appendChild(li);
+        break;
     }
-
-    const statusSpan = document.createElement('span');
-    statusSpan.textContent = `Status: ${task.status}`;
-    statusSpan.className = `task-status status-${task.status}`;
-    taskInfo.appendChild(statusSpan);
-
-    li.appendChild(taskInfo);
-
-    const actionsDiv = document.createElement('div');
-    actionsDiv.className = 'task-actions';
-
-    const editBtn = document.createElement('button');
-    editBtn.textContent = 'Edit';
-    editBtn.className = 'btn btn-primary btn-sm';
-    editBtn.addEventListener('click', () => showEditModal(task.id));
-    actionsDiv.appendChild(editBtn);
-
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = 'Delete';
-    deleteBtn.className = 'btn btn-danger btn-sm';
-    deleteBtn.addEventListener('click', () => deleteTask(task.id));
-    actionsDiv.appendChild(deleteBtn);
-
-    li.appendChild(actionsDiv);
-
-    taskList.appendChild(li);
   });
 }
+
+function handleDragStart(e) {
+  e.dataTransfer.setData('text/plain', e.currentTarget.dataset.taskId);
+  e.currentTarget.classList.add('dragging');
+}
+
+function handleDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('drag-over');
+}
+
+function handleDragLeave(e) {
+  if (!e.currentTarget.contains(e.relatedTarget)) {
+    e.currentTarget.classList.remove('drag-over');
+  }
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+
+  const taskId = parseInt(e.dataTransfer.getData('text/plain'), 10);
+  const newStatus = e.currentTarget.dataset.status;
+
+  const task = tasks.find(t => t.id === taskId);
+  if (task && task.status !== newStatus) {
+    task.status = newStatus;
+    saveState();
+    renderTasks();
+  }
+}
+
+[pendingZone, inProgressZone, completedZone].forEach(zone => {
+  zone.addEventListener('dragover', handleDragOver);
+  zone.addEventListener('dragleave', handleDragLeave);
+  zone.addEventListener('drop', handleDrop);
+});
 
 taskForm.addEventListener('submit', addTask);
 confirmDeleteBtn.addEventListener('click', confirmDelete);

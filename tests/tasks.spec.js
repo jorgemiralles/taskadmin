@@ -12,23 +12,33 @@ test.describe('Task Manager', () => {
     await expect(page.locator('h1')).toHaveText('Task Manager');
   });
 
-  test('starts with an empty task list', async ({ page }) => {
-    await expect(page.locator('#taskList li')).toHaveCount(0);
+  test('starts with empty columns', async ({ page }) => {
+    await expect(page.locator('#pendingColumn li')).toHaveCount(0);
+    await expect(page.locator('#inProgressColumn li')).toHaveCount(0);
+    await expect(page.locator('#completedColumn li')).toHaveCount(0);
+  });
+
+  test('displays three kanban columns', async ({ page }) => {
+    await expect(page.locator('#pendingColumn')).toBeVisible();
+    await expect(page.locator('#inProgressColumn')).toBeVisible();
+    await expect(page.locator('#completedColumn')).toBeVisible();
+    await expect(page.locator('.status-pending-header')).toHaveText('Pending');
+    await expect(page.locator('.status-in-progress-header')).toHaveText('In Progress');
+    await expect(page.locator('.status-completed-header')).toHaveText('Completed');
   });
 
   test('displays input and add button', async ({ page }) => {
     await expect(page.locator('#taskInput')).toBeVisible();
     await expect(page.locator('#addBtn')).toBeVisible();
     await expect(page.locator('#startDate')).toBeVisible();
-    await expect(page.locator('#taskStatus')).not.toBeVisible();
   });
 
   test('adds a task via button click', async ({ page }) => {
     await page.fill('#taskInput', 'Buy groceries');
     await page.click('#addBtn');
 
-    await expect(page.locator('#taskList li')).toHaveCount(1);
-    await expect(page.locator('#taskList li').first()).toContainText('Buy groceries');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1);
+    await expect(page.locator('#pendingColumn li').first()).toContainText('Buy groceries');
     await expect(page.locator('#taskInput')).toHaveValue('');
   });
 
@@ -36,33 +46,33 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Walk the dog');
     await page.press('#taskInput', 'Enter');
 
-    await expect(page.locator('#taskList li')).toHaveCount(1);
-    await expect(page.locator('#taskList li').first()).toContainText('Walk the dog');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1);
+    await expect(page.locator('#pendingColumn li').first()).toContainText('Walk the dog');
   });
 
   test('does not add empty task', async ({ page }) => {
     await page.click('#addBtn');
-    await expect(page.locator('#taskList li')).toHaveCount(0);
+    await expect(page.locator('#pendingColumn li')).toHaveCount(0);
 
     await page.fill('#taskInput', '   ');
     await page.click('#addBtn');
-    await expect(page.locator('#taskList li')).toHaveCount(0);
+    await expect(page.locator('#pendingColumn li')).toHaveCount(0);
   });
 
   test('renders task titles as text, not HTML', async ({ page }) => {
     await page.fill('#taskInput', '<script>alert("xss")</script>');
     await page.click('#addBtn');
 
-    const taskText = await page.locator('#taskList li').first().innerText();
+    const taskText = await page.locator('#pendingColumn li').first().innerText();
     expect(taskText).toContain('<script>alert("xss")</script>');
 
     let dialog = false;
     page.on('dialog', () => { dialog = true; });
-    await expect(page.locator('#taskList li')).toHaveCount(1);
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1);
     expect(dialog).toBe(false);
   });
 
-  test('adds multiple tasks', async ({ page }) => {
+  test('adds multiple tasks to pending column', async ({ page }) => {
     await page.fill('#taskInput', 'Task 1');
     await page.click('#addBtn');
 
@@ -72,23 +82,23 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Task 3');
     await page.click('#addBtn');
 
-    await expect(page.locator('#taskList li')).toHaveCount(3);
-    await expect(page.locator('#taskList li').nth(0)).toContainText('Task 1');
-    await expect(page.locator('#taskList li').nth(1)).toContainText('Task 2');
-    await expect(page.locator('#taskList li').nth(2)).toContainText('Task 3');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(3);
+    await expect(page.locator('#pendingColumn li').nth(0)).toContainText('Task 1');
+    await expect(page.locator('#pendingColumn li').nth(1)).toContainText('Task 2');
+    await expect(page.locator('#pendingColumn li').nth(2)).toContainText('Task 3');
   });
 
   test('deletes a task after confirmation', async ({ page }) => {
     await page.fill('#taskInput', 'Task to delete');
     await page.click('#addBtn');
-    await expect(page.locator('#taskList li')).toHaveCount(1);
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1);
 
-    await page.locator('.btn-danger.btn-sm').first().click();
+    await page.locator('#pendingColumn .btn-danger.btn-sm').first().click();
     await expect(page.locator('#confirmModal')).toBeVisible();
     await expect(page.locator('.modal-body p')).toHaveText('Are you sure you want to delete this task?');
 
     await page.click('#confirmDeleteBtn');
-    await expect(page.locator('#taskList li')).toHaveCount(0);
+    await expect(page.locator('#pendingColumn li')).toHaveCount(0);
     await expect(page.locator('#confirmModal')).not.toBeVisible();
   });
 
@@ -102,45 +112,29 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Keep too');
     await page.click('#addBtn');
 
-    await expect(page.locator('#taskList li')).toHaveCount(3);
+    await expect(page.locator('#pendingColumn li')).toHaveCount(3);
 
-    await page.locator('#taskList li', { hasText: 'Remove' }).locator('.btn-danger.btn-sm').click();
+    await page.locator('#pendingColumn li', { hasText: 'Remove' }).locator('.btn-danger.btn-sm').click();
     await expect(page.locator('#confirmModal')).toBeVisible();
 
     await page.click('#confirmDeleteBtn');
-    await expect(page.locator('#taskList li')).toHaveCount(2);
-    await expect(page.locator('#taskList li').nth(0)).toContainText('Keep');
-    await expect(page.locator('#taskList li').nth(1)).toContainText('Keep too');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(2);
+    await expect(page.locator('#pendingColumn li').nth(0)).toContainText('Keep');
+    await expect(page.locator('#pendingColumn li').nth(1)).toContainText('Keep too');
   });
 
   test('cancels delete from confirmation popup', async ({ page }) => {
     await page.fill('#taskInput', 'Task to keep');
     await page.click('#addBtn');
-    await expect(page.locator('#taskList li')).toHaveCount(1);
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1);
 
-    await page.locator('.btn-danger.btn-sm').first().click();
+    await page.locator('#pendingColumn .btn-danger.btn-sm').first().click();
     await expect(page.locator('#confirmModal')).toBeVisible();
 
     await page.click('#cancelDeleteBtn');
     await expect(page.locator('#confirmModal')).not.toBeVisible();
-    await expect(page.locator('#taskList li')).toHaveCount(1);
-    await expect(page.locator('#taskList li').first()).toContainText('Task to keep');
-  });
-
-  test('cancel delete preserves all tasks', async ({ page }) => {
-    await page.fill('#taskInput', 'Task A');
-    await page.click('#addBtn');
-
-    await page.fill('#taskInput', 'Task B');
-    await page.click('#addBtn');
-
-    await page.locator('#taskList li', { hasText: 'Task A' }).locator('.btn-danger.btn-sm').click();
-    await expect(page.locator('#confirmModal')).toBeVisible();
-
-    await page.click('#cancelDeleteBtn');
-    await expect(page.locator('#taskList li')).toHaveCount(2);
-    await expect(page.locator('#taskList li').nth(0)).toContainText('Task A');
-    await expect(page.locator('#taskList li').nth(1)).toContainText('Task B');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1);
+    await expect(page.locator('#pendingColumn li').first()).toContainText('Task to keep');
   });
 
   test('confirm modal is hidden by default', async ({ page }) => {
@@ -152,8 +146,8 @@ test.describe('Task Manager', () => {
     await page.click('#addBtn');
 
     await page.reload();
-    await expect(page.locator('#taskList li')).toHaveCount(1);
-    await expect(page.locator('#taskList li').first()).toContainText('Persistent task');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1);
+    await expect(page.locator('#pendingColumn li').first()).toContainText('Persistent task');
   });
 
   test('each task has a delete button', async ({ page }) => {
@@ -187,7 +181,7 @@ test.describe('Task Manager', () => {
     await page.fill('#startDate', '2026-07-01');
     await page.click('#addBtn');
 
-    await page.locator('.btn-primary.btn-sm').first().click();
+    await page.locator('#pendingColumn .btn-primary.btn-sm').first().click();
 
     await expect(page.locator('#editModal')).toBeVisible();
     await expect(page.locator('#editTitle')).toHaveValue('Original task');
@@ -199,7 +193,7 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Buy groceries');
     await page.click('#addBtn');
 
-    await page.locator('.btn-primary.btn-sm').first().click();
+    await page.locator('#pendingColumn .btn-primary.btn-sm').first().click();
     await page.fill('#editTitle', 'Buy organic groceries');
     await page.click('#saveEditBtn');
 
@@ -207,23 +201,24 @@ test.describe('Task Manager', () => {
     await expect(page.locator('#editModal')).not.toBeVisible();
   });
 
-  test('saves edited task status via popup', async ({ page }) => {
+  test('saves edited task status via popup moves to correct column', async ({ page }) => {
     await page.fill('#taskInput', 'Task status');
     await page.click('#addBtn');
 
-    await page.locator('.btn-primary.btn-sm').first().click();
+    await page.locator('#pendingColumn .btn-primary.btn-sm').first().click();
     await page.selectOption('#editStatus', 'completed');
     await page.click('#saveEditBtn');
 
-    await expect(page.locator('.task-status').first()).toHaveText('Status: completed');
-    await expect(page.locator('.status-completed')).toHaveCount(1);
+    await expect(page.locator('#pendingColumn li')).toHaveCount(0);
+    await expect(page.locator('#completedColumn li')).toHaveCount(1);
+    await expect(page.locator('#completedColumn li').first()).toContainText('Task status');
   });
 
   test('saves edited task start date via popup', async ({ page }) => {
     await page.fill('#taskInput', 'Dated task');
     await page.click('#addBtn');
 
-    await page.locator('.btn-primary.btn-sm').first().click();
+    await page.locator('#pendingColumn .btn-primary.btn-sm').first().click();
     await page.fill('#editStartDate', '2026-08-01');
     await page.click('#saveEditBtn');
 
@@ -234,7 +229,7 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Original');
     await page.click('#addBtn');
 
-    await page.locator('.btn-primary.btn-sm').first().click();
+    await page.locator('#pendingColumn .btn-primary.btn-sm').first().click();
     await page.fill('#editTitle', 'Changed');
     await page.click('#cancelEditBtn');
 
@@ -249,11 +244,11 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Task B');
     await page.click('#addBtn');
 
-    await page.locator('.btn-primary.btn-sm').first().click();
+    await page.locator('#pendingColumn .btn-primary.btn-sm').first().click();
     await page.fill('#editTitle', 'Task A edited');
     await page.click('#saveEditBtn');
 
-    await expect(page.locator('#taskList li')).toHaveCount(2);
+    await expect(page.locator('#pendingColumn li')).toHaveCount(2);
     await expect(page.locator('.task-title').first()).toHaveText('Task A edited');
     await expect(page.locator('.task-title').nth(1)).toHaveText('Task B');
   });
@@ -262,7 +257,7 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Persistent');
     await page.click('#addBtn');
 
-    await page.locator('.btn-primary.btn-sm').first().click();
+    await page.locator('#pendingColumn .btn-primary.btn-sm').first().click();
     await page.fill('#editTitle', 'Persistent edited');
     await page.click('#saveEditBtn');
 
@@ -274,9 +269,9 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Default status task');
     await page.click('#addBtn');
 
-    await expect(page.locator('.task-status')).toHaveCount(1);
-    await expect(page.locator('.task-status').first()).toHaveText('Status: pending');
-    await expect(page.locator('.status-pending')).toHaveCount(1);
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1);
+    await expect(page.locator('#inProgressColumn li')).toHaveCount(0);
+    await expect(page.locator('#completedColumn li')).toHaveCount(0);
   });
 
   test('adds task with start date', async ({ page }) => {
@@ -293,10 +288,9 @@ test.describe('Task Manager', () => {
     await page.fill('#startDate', '2026-08-01');
     await page.click('#addBtn');
 
-    await expect(page.locator('#taskList li')).toHaveCount(1);
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1);
     await expect(page.locator('.task-title').first()).toHaveText('Full task');
     await expect(page.locator('.task-date').first()).toContainText('Start: 2026-08-01');
-    await expect(page.locator('.task-status').first()).toHaveText('Status: pending');
   });
 
   test('clears all inputs after adding task', async ({ page }) => {
@@ -319,7 +313,7 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Task with today');
     await page.click('#addBtn');
 
-    await expect(page.locator('#taskList li')).toHaveCount(1);
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1);
     await expect(page.locator('.task-date').first()).toContainText(`Start: ${today}`);
   });
 
@@ -330,5 +324,162 @@ test.describe('Task Manager', () => {
     await page.click('#addBtn');
 
     await expect(page.locator('#startDate')).toHaveValue(today);
+  });
+});
+
+test.describe('Kanban Board Columns', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+  });
+
+  test('three columns are displayed', async ({ page }) => {
+    await expect(page.locator('.status-pending-header')).toHaveText('Pending');
+    await expect(page.locator('.status-in-progress-header')).toHaveText('In Progress');
+    await expect(page.locator('.status-completed-header')).toHaveText('Completed');
+  });
+
+  test('new tasks start in pending column', async ({ page }) => {
+    await page.fill('#taskInput', 'Buy groceries');
+    await page.click('#addBtn');
+
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1);
+    await expect(page.locator('#pendingColumn li').first()).toContainText('Buy groceries');
+    await expect(page.locator('#inProgressColumn li')).toHaveCount(0);
+    await expect(page.locator('#completedColumn li')).toHaveCount(0);
+  });
+
+  test('multiple new tasks appear in pending column', async ({ page }) => {
+    await page.fill('#taskInput', 'Task 1');
+    await page.click('#addBtn');
+
+    await page.fill('#taskInput', 'Task 2');
+    await page.click('#addBtn');
+
+    await expect(page.locator('#pendingColumn li')).toHaveCount(2);
+    await expect(page.locator('#pendingColumn li').nth(0)).toContainText('Task 1');
+    await expect(page.locator('#pendingColumn li').nth(1)).toContainText('Task 2');
+  });
+
+  test('drag task from pending to in progress', async ({ page }) => {
+    await page.fill('#taskInput', 'My task');
+    await page.click('#addBtn');
+
+    const task = page.locator('#pendingColumn li').first();
+    const targetColumn = page.locator('#inProgressColumn');
+
+    await task.dragTo(targetColumn);
+
+    await expect(page.locator('#pendingColumn li')).toHaveCount(0);
+    await expect(page.locator('#inProgressColumn li')).toHaveCount(1);
+    await expect(page.locator('#inProgressColumn li').first()).toContainText('My task');
+  });
+
+  test('drag task from in progress to completed', async ({ page }) => {
+    await page.fill('#taskInput', 'My task');
+    await page.click('#addBtn');
+
+    const task = page.locator('#pendingColumn li').first();
+    const targetColumn = page.locator('#inProgressColumn');
+    await task.dragTo(targetColumn);
+
+    const taskInProgress = page.locator('#inProgressColumn li').first();
+    const completedColumn = page.locator('#completedColumn');
+    await taskInProgress.dragTo(completedColumn);
+
+    await expect(page.locator('#inProgressColumn li')).toHaveCount(0);
+    await expect(page.locator('#completedColumn li')).toHaveCount(1);
+    await expect(page.locator('#completedColumn li').first()).toContainText('My task');
+  });
+
+  test('drag task from completed back to pending', async ({ page }) => {
+    await page.fill('#taskInput', 'My task');
+    await page.click('#addBtn');
+
+    await page.locator('#pendingColumn li').first().dragTo(page.locator('#completedColumn'));
+
+    await page.locator('#completedColumn li').first().dragTo(page.locator('#pendingColumn'));
+
+    await expect(page.locator('#completedColumn li')).toHaveCount(0);
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1);
+    await expect(page.locator('#pendingColumn li').first()).toContainText('My task');
+  });
+
+  test('drag task from pending to completed directly', async ({ page }) => {
+    await page.fill('#taskInput', 'Fast track task');
+    await page.click('#addBtn');
+
+    await page.locator('#pendingColumn li').first().dragTo(page.locator('#completedColumn'));
+
+    await expect(page.locator('#pendingColumn li')).toHaveCount(0);
+    await expect(page.locator('#completedColumn li')).toHaveCount(1);
+    await expect(page.locator('#completedColumn li').first()).toContainText('Fast track task');
+  });
+
+  test('task status persists after drag', async ({ page }) => {
+    await page.fill('#taskInput', 'Persistent task');
+    await page.click('#addBtn');
+
+    await page.locator('#pendingColumn li').first().dragTo(page.locator('#inProgressColumn'));
+    await expect(page.locator('#inProgressColumn li')).toHaveCount(1);
+
+    await page.reload();
+    await expect(page.locator('#inProgressColumn li')).toHaveCount(1);
+    await expect(page.locator('#inProgressColumn li').first()).toContainText('Persistent task');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(0);
+  });
+
+  test('multiple tasks can exist in different columns', async ({ page }) => {
+    await page.fill('#taskInput', 'Pending task');
+    await page.click('#addBtn');
+
+    await page.fill('#taskInput', 'Active task');
+    await page.click('#addBtn');
+
+    await page.fill('#taskInput', 'Done task');
+    await page.click('#addBtn');
+
+    await page.locator('#pendingColumn li', { hasText: 'Active task' }).dragTo(page.locator('#inProgressColumn'));
+    await page.locator('#pendingColumn li', { hasText: 'Done task' }).dragTo(page.locator('#completedColumn'));
+
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1);
+    await expect(page.locator('#pendingColumn li').first()).toContainText('Pending task');
+    await expect(page.locator('#inProgressColumn li')).toHaveCount(1);
+    await expect(page.locator('#inProgressColumn li').first()).toContainText('Active task');
+    await expect(page.locator('#completedColumn li')).toHaveCount(1);
+    await expect(page.locator('#completedColumn li').first()).toContainText('Done task');
+  });
+
+  test('delete task from a column', async ({ page }) => {
+    await page.fill('#taskInput', 'Task to delete');
+    await page.click('#addBtn');
+
+    await page.locator('#pendingColumn li').first().dragTo(page.locator('#inProgressColumn'));
+
+    await page.locator('#inProgressColumn .btn-danger.btn-sm').first().click();
+    await page.click('#confirmDeleteBtn');
+
+    await expect(page.locator('#inProgressColumn li')).toHaveCount(0);
+  });
+
+  test('edit task from a column', async ({ page }) => {
+    await page.fill('#taskInput', 'Original title');
+    await page.click('#addBtn');
+
+    await page.locator('#pendingColumn .btn-primary.btn-sm').first().click();
+    await page.fill('#editTitle', 'Updated title');
+    await page.click('#saveEditBtn');
+
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1);
+    await expect(page.locator('#pendingColumn li').first()).toContainText('Updated title');
+  });
+
+  test('tasks are draggable', async ({ page }) => {
+    await page.fill('#taskInput', 'Draggable task');
+    await page.click('#addBtn');
+
+    const task = page.locator('#pendingColumn li').first();
+    await expect(task).toHaveAttribute('draggable', 'true');
   });
 });

@@ -19,7 +19,26 @@
       </div>
       <button id="addBtn" class="btn btn-success w-100" type="submit">Add</button>
     </form>
-    <ul id="taskList" class="list-group mt-3"></ul>
+    <div class="row mt-4" id="kanbanBoard">
+      <div class="col-md-4">
+        <div class="kanban-zone" data-status="pending">
+          <h5 class="column-header status-pending-header">Pending</h5>
+          <ul id="pendingColumn" class="kanban-column list-group"></ul>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="kanban-zone" data-status="in-progress">
+          <h5 class="column-header status-in-progress-header">In Progress</h5>
+          <ul id="inProgressColumn" class="kanban-column list-group"></ul>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="kanban-zone" data-status="completed">
+          <h5 class="column-header status-completed-header">Completed</h5>
+          <ul id="completedColumn" class="kanban-column list-group"></ul>
+        </div>
+      </div>
+    </div>
   </div>
   <div id="confirmModal" class="modal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">

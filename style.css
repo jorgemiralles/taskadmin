@@ -42,3 +42,55 @@
   background: #e8f5e9;
   color: #2e7d32;
 }
+
+.column-header {
+  text-align: center;
+  padding: 10px;
+  border-radius: 6px 6px 0 0;
+  margin-bottom: 0;
+  font-weight: 600;
+}
+
+.status-pending-header {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.status-in-progress-header {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.status-completed-header {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.kanban-zone {
+  min-height: 200px;
+  height: 200px;
+  border: 2px dashed #dee2e6;
+  border-radius: 0 0 6px 6px;
+  transition: background-color 0.2s;
+  overflow-y: auto;
+}
+
+.kanban-zone.drag-over {
+  background-color: #e9ecef;
+  border-color: #86b7fe;
+}
+
+.kanban-column {
+  padding: 8px;
+  margin-bottom: 0;
+  border: none;
+}
+
+.kanban-column .list-group-item {
+  cursor: grab;
+  user-select: none;
+}
+
+.kanban-column .list-group-item.dragging {
+  opacity: 0.4;
+}
