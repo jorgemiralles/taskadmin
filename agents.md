@@ -49,3 +49,9 @@
 - **Commit Convention:** [Conventional Commits](https://www.conventionalcommits.org/)
 - **Format:** `type(scope): description`
 - **Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`, `build`, `perf`
+
+## Figma Integration
+
+-   **API:** Direct REST API (`api.figma.com`)
+-   **Authentication:** Personal Access Token (`X-Figma-Token` header)
+-   **Usage:** Fetching design tokens, styles, and layout information from Figma files to apply to the web application.
