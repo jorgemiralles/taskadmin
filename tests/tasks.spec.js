@@ -336,6 +336,23 @@ test.describe('Kanban Board Columns', () => {
     await page.reload();
   });
 
+  async function drag(page, sourceLocator, targetLocator, targetPosition) {
+    await sourceLocator.scrollIntoViewIfNeeded();
+    await targetLocator.scrollIntoViewIfNeeded();
+    const sourceBox = await sourceLocator.boundingBox();
+    const targetBox = await targetLocator.boundingBox();
+    if (!sourceBox || !targetBox) throw new Error('Element not visible');
+    const sx = sourceBox.x + sourceBox.width / 2;
+    const sy = sourceBox.y + sourceBox.height / 2;
+    const tx = targetBox.x + (targetPosition?.x ?? targetBox.width / 2);
+    const ty = targetBox.y + (targetPosition?.y ?? targetBox.height / 2);
+    await page.mouse.move(sx, sy);
+    await page.mouse.down();
+    await page.mouse.move(tx, ty, { steps: 20 });
+    await page.mouse.up();
+    await page.waitForTimeout(200);
+  }
+
   test('three columns are displayed', async ({ page }) => {
     await expect(page.locator('.status-pending-header')).toHaveText('Pending');
     await expect(page.locator('.status-in-progress-header')).toHaveText('In Progress');
@@ -371,7 +388,7 @@ test.describe('Kanban Board Columns', () => {
     const task = page.locator('#pendingColumn li').first();
     const targetColumn = page.locator('#inProgressColumn');
 
-    await task.dragTo(targetColumn);
+    await drag(page, task, targetColumn);
 
     await expect(page.locator('#pendingColumn li')).toHaveCount(0);
     await expect(page.locator('#inProgressColumn li')).toHaveCount(1);
@@ -384,11 +401,11 @@ test.describe('Kanban Board Columns', () => {
 
     const task = page.locator('#pendingColumn li').first();
     const targetColumn = page.locator('#inProgressColumn');
-    await task.dragTo(targetColumn);
+    await drag(page, task, targetColumn);
 
     const taskInProgress = page.locator('#inProgressColumn li').first();
     const completedColumn = page.locator('#completedColumn');
-    await taskInProgress.dragTo(completedColumn);
+    await drag(page, taskInProgress, completedColumn);
 
     await expect(page.locator('#inProgressColumn li')).toHaveCount(0);
     await expect(page.locator('#completedColumn li')).toHaveCount(1);
@@ -399,9 +416,9 @@ test.describe('Kanban Board Columns', () => {
     await page.fill('#taskInput', 'My task');
     await page.click('#addBtn');
 
-    await page.locator('#pendingColumn li').first().dragTo(page.locator('#completedColumn'));
+    await drag(page, page.locator('#pendingColumn li').first(), page.locator('#completedColumn'));
 
-    await page.locator('#completedColumn li').first().dragTo(page.locator('#pendingColumn'));
+    await drag(page, page.locator('#completedColumn li').first(), page.locator('#pendingColumn'));
 
     await expect(page.locator('#completedColumn li')).toHaveCount(0);
     await expect(page.locator('#pendingColumn li')).toHaveCount(1);
@@ -412,7 +429,7 @@ test.describe('Kanban Board Columns', () => {
     await page.fill('#taskInput', 'Fast track task');
     await page.click('#addBtn');
 
-    await page.locator('#pendingColumn li').first().dragTo(page.locator('#completedColumn'));
+    await drag(page, page.locator('#pendingColumn li').first(), page.locator('#completedColumn'));
 
     await expect(page.locator('#pendingColumn li')).toHaveCount(0);
     await expect(page.locator('#completedColumn li')).toHaveCount(1);
@@ -423,7 +440,7 @@ test.describe('Kanban Board Columns', () => {
     await page.fill('#taskInput', 'Persistent task');
     await page.click('#addBtn');
 
-    await page.locator('#pendingColumn li').first().dragTo(page.locator('#inProgressColumn'));
+    await drag(page, page.locator('#pendingColumn li').first(), page.locator('#inProgressColumn'));
     await expect(page.locator('#inProgressColumn li')).toHaveCount(1);
 
     await page.reload();
@@ -442,8 +459,8 @@ test.describe('Kanban Board Columns', () => {
     await page.fill('#taskInput', 'Done task');
     await page.click('#addBtn');
 
-    await page.locator('#pendingColumn li', { hasText: 'Active task' }).dragTo(page.locator('#inProgressColumn'));
-    await page.locator('#pendingColumn li', { hasText: 'Done task' }).dragTo(page.locator('#completedColumn'));
+    await drag(page, page.locator('#pendingColumn li', { hasText: 'Active task' }), page.locator('#inProgressColumn'));
+    await drag(page, page.locator('#pendingColumn li', { hasText: 'Done task' }), page.locator('#completedColumn'));
 
     await expect(page.locator('#pendingColumn li')).toHaveCount(1);
     await expect(page.locator('#pendingColumn li').first()).toContainText('Pending task');
@@ -457,7 +474,7 @@ test.describe('Kanban Board Columns', () => {
     await page.fill('#taskInput', 'Task to delete');
     await page.click('#addBtn');
 
-    await page.locator('#pendingColumn li').first().dragTo(page.locator('#inProgressColumn'));
+    await drag(page, page.locator('#pendingColumn li').first(), page.locator('#inProgressColumn'));
 
     await page.locator('#inProgressColumn .btn-task-delete').first().click();
     await page.click('#confirmDeleteBtn');

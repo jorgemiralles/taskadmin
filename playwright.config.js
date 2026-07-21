@@ -8,6 +8,7 @@ module.exports = defineConfig({
   use: {
     baseURL: 'http://localhost:8080',
     headless: true,
+    viewport: { width: 1280, height: 1200 },
   },
   webServer: {
     command: 'darkhttpd . --port 8080',
