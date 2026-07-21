@@ -5,81 +5,203 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Task Manager</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container mt-4">
-    <h1 class="mb-4 text-center">Task Manager</h1>
-    <form id="taskForm">
-      <input type="text" id="taskInput" class="form-control mb-2" placeholder="Enter task title" aria-label="Task title">
-      <div class="row g-2 mb-2">
-        <div class="col">
-          <input type="date" id="startDate" class="form-control" aria-label="Start date">
+  <div class="app-wrapper">
+    <header class="app-header">
+      <div class="header-content">
+        <div class="header-left">
+          <button class="header-btn" aria-label="Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <h1 class="header-title">Task Manager</h1>
+        </div>
+        <div class="header-right">
+          <button class="header-btn notification-btn" aria-label="Notifications">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notification-dot"></span>
+          </button>
         </div>
       </div>
-      <button id="addBtn" class="btn btn-success w-100" type="submit">Add</button>
-    </form>
-    <div class="row mt-4" id="kanbanBoard">
-      <div class="col-md-4">
-        <div class="kanban-zone" data-status="pending">
-          <h5 class="column-header status-pending-header">Pending</h5>
-          <ul id="pendingColumn" class="kanban-column list-group"></ul>
+    </header>
+
+    <main class="app-content" id="appContent">
+      <div class="progress-card">
+        <div class="progress-card-body">
+          <div class="progress-info">
+            <h2 class="progress-title">Task Progress</h2>
+            <p class="progress-subtitle" id="progressSubtitle">0 of 0 tasks completed</p>
+            <div class="progress-pill" id="viewTaskBtn">View Tasks</div>
+          </div>
+          <div class="progress-ring-wrapper">
+            <svg class="progress-ring" width="76" height="76" viewBox="0 0 76 76">
+              <circle class="progress-ring-bg" cx="38" cy="38" r="30" fill="none" stroke-width="6"/>
+              <circle class="progress-ring-fill" id="progressRingFill" cx="38" cy="38" r="30" fill="none" stroke-width="6" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="188.5"/>
+            </svg>
+            <span class="progress-percent" id="progressPercent">0%</span>
+          </div>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="kanban-zone" data-status="in-progress">
-          <h5 class="column-header status-in-progress-header">In Progress</h5>
-          <ul id="inProgressColumn" class="kanban-column list-group"></ul>
+
+      <div class="section-header">
+        <h3 class="section-title">Task Groups</h3>
+        <button class="section-link" id="viewAllBtn">View All</button>
+      </div>
+      <div class="task-groups" id="taskGroups">
+        <div class="task-group-card" data-filter="pending">
+          <div class="task-group-icon icon-todo">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0087FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <div class="task-group-info">
+            <span class="task-group-name">To-do</span>
+            <span class="task-group-count" id="pendingCount">0 Tasks</span>
+          </div>
+          <div class="task-group-progress">
+            <div class="task-group-bar"><div class="task-group-bar-fill bar-todo" id="pendingBar" style="width:0%"></div></div>
+          </div>
+        </div>
+        <div class="task-group-card" data-filter="in-progress">
+          <div class="task-group-icon icon-progress">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF7D53" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="task-group-info">
+            <span class="task-group-name">In Progress</span>
+            <span class="task-group-count" id="inProgressCount">0 Tasks</span>
+          </div>
+          <div class="task-group-progress">
+            <div class="task-group-bar"><div class="task-group-bar-fill bar-progress" id="inProgressBar" style="width:0%"></div></div>
+          </div>
+        </div>
+        <div class="task-group-card" data-filter="completed">
+          <div class="task-group-icon icon-done">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5F33E1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div class="task-group-info">
+            <span class="task-group-name">Completed</span>
+            <span class="task-group-count" id="completedCount">0 Tasks</span>
+          </div>
+          <div class="task-group-progress">
+            <div class="task-group-bar"><div class="task-group-bar-fill bar-done" id="completedBar" style="width:0%"></div></div>
+          </div>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="kanban-zone" data-status="completed">
-          <h5 class="column-header status-completed-header">Completed</h5>
-          <ul id="completedColumn" class="kanban-column list-group"></ul>
-        </div>
+
+      <div class="section-header">
+        <h3 class="section-title">In Progress</h3>
+        <span class="section-badge" id="inProgressBadge">0</span>
+      </div>
+    </main>
+
+    <div class="kanban-board" id="kanbanBoard">
+      <div class="kanban-zone" data-status="pending">
+        <h5 class="column-header status-pending-header">
+          <span class="column-dot dot-pending"></span>
+          Pending
+        </h5>
+        <ul id="pendingColumn" class="kanban-column list-group"></ul>
+      </div>
+      <div class="kanban-zone" data-status="in-progress">
+        <h5 class="column-header status-in-progress-header">
+          <span class="column-dot dot-progress"></span>
+          In Progress
+        </h5>
+        <ul id="inProgressColumn" class="kanban-column list-group"></ul>
+      </div>
+      <div class="kanban-zone" data-status="completed">
+        <h5 class="column-header status-completed-header">
+          <span class="column-dot dot-done"></span>
+          Completed
+        </h5>
+        <ul id="completedColumn" class="kanban-column list-group"></ul>
       </div>
     </div>
+
+    <div class="add-task-section" id="addTaskSection">
+      <form id="taskForm" class="add-task-form">
+        <input type="text" id="taskInput" class="form-input" placeholder="Enter task title" aria-label="Task title">
+        <input type="date" id="startDate" class="form-input" aria-label="Start date">
+        <button id="addBtn" class="btn-add" type="submit">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Task
+        </button>
+      </form>
+    </div>
+
+    <nav class="bottom-nav" id="bottomNav">
+      <div class="nav-bg"></div>
+      <div class="nav-items">
+        <button class="nav-item active" data-tab="home" aria-label="Home">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          <span>Home</span>
+        </button>
+        <button class="nav-item" data-tab="calendar" aria-label="Calendar">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Calendar</span>
+        </button>
+        <button class="nav-item nav-fab" data-tab="add" aria-label="Add Task">
+          <div class="fab-btn">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </div>
+        </button>
+        <button class="nav-item" data-tab="documents" aria-label="Documents">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span>Docs</span>
+        </button>
+        <button class="nav-item" data-tab="profile" aria-label="Profile">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>Profile</span>
+        </button>
+      </div>
+    </nav>
   </div>
+
   <div id="confirmModal" class="modal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
+      <div class="modal-content custom-modal">
+        <div class="modal-header custom-modal-header">
           <h5 class="modal-title">Confirm Delete</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body custom-modal-body">
           <p>Are you sure you want to delete this task?</p>
         </div>
-        <div class="modal-footer">
-          <button id="confirmDeleteBtn" class="btn btn-danger">Confirm</button>
-          <button id="cancelDeleteBtn" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <div class="modal-footer custom-modal-footer">
+          <button id="confirmDeleteBtn" class="btn-modal btn-danger-custom">Delete</button>
+          <button id="cancelDeleteBtn" class="btn-modal btn-cancel-custom" data-bs-dismiss="modal">Cancel</button>
         </div>
       </div>
     </div>
   </div>
+
   <div id="editModal" class="modal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
+      <div class="modal-content custom-modal">
+        <div class="modal-header custom-modal-header">
           <h5 class="modal-title">Edit Task</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
-          <input type="text" id="editTitle" class="form-control mb-2" placeholder="Enter task title" aria-label="Task title">
-          <input type="date" id="editStartDate" class="form-control mb-2" aria-label="Start date">
-          <select id="editStatus" class="form-select mb-2" aria-label="Task status">
-            <option value="pending">Pending</option>
+        <div class="modal-body custom-modal-body">
+          <label class="form-label-custom">Project Name</label>
+          <input type="text" id="editTitle" class="form-input mb-3" placeholder="Enter task title" aria-label="Task title">
+          <label class="form-label-custom">Start Date</label>
+          <input type="date" id="editStartDate" class="form-input mb-3" aria-label="Start date">
+          <label class="form-label-custom">Status</label>
+          <select id="editStatus" class="form-input mb-3" aria-label="Task status">
+            <option value="pending">To-do</option>
             <option value="in-progress">In Progress</option>
             <option value="completed">Completed</option>
           </select>
         </div>
-        <div class="modal-footer">
-          <button id="saveEditBtn" class="btn btn-success">Save</button>
-          <button id="cancelEditBtn" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <div class="modal-footer custom-modal-footer">
+          <button id="saveEditBtn" class="btn-modal btn-save-custom">Save</button>
+          <button id="cancelEditBtn" class="btn-modal btn-cancel-custom" data-bs-dismiss="modal">Cancel</button>
         </div>
       </div>
     </div>
   </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="app.js"></script>
 </body>

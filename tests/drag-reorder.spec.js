@@ -173,7 +173,7 @@ test.describe('Drag to Reorder Tasks Within Column', () => {
     const orderBefore = await getTaskOrder(page, '#pendingColumn');
     expect(orderBefore).toEqual(['Zebra', 'X-ray', 'Yield']);
 
-    await page.locator('#pendingColumn li[data-task-id="2"]').locator('.btn-danger.btn-sm').click();
+    await page.locator('#pendingColumn li[data-task-id="2"]').locator('.btn-task-delete').click();
     await page.click('#confirmDeleteBtn');
 
     const orderAfter = await getTaskOrder(page, '#pendingColumn');

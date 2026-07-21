@@ -93,7 +93,7 @@ test.describe('Task Manager', () => {
     await page.click('#addBtn');
     await expect(page.locator('#pendingColumn li')).toHaveCount(1);
 
-    await page.locator('#pendingColumn .btn-danger.btn-sm').first().click();
+    await page.locator('#pendingColumn .btn-task-delete').first().click();
     await expect(page.locator('#confirmModal')).toBeVisible();
     await expect(page.locator('.modal-body p')).toHaveText('Are you sure you want to delete this task?');
 
@@ -114,7 +114,7 @@ test.describe('Task Manager', () => {
 
     await expect(page.locator('#pendingColumn li')).toHaveCount(3);
 
-    await page.locator('#pendingColumn li', { hasText: 'Remove' }).locator('.btn-danger.btn-sm').click();
+    await page.locator('#pendingColumn li', { hasText: 'Remove' }).locator('.btn-task-delete').click();
     await expect(page.locator('#confirmModal')).toBeVisible();
 
     await page.click('#confirmDeleteBtn');
@@ -128,7 +128,7 @@ test.describe('Task Manager', () => {
     await page.click('#addBtn');
     await expect(page.locator('#pendingColumn li')).toHaveCount(1);
 
-    await page.locator('#pendingColumn .btn-danger.btn-sm').first().click();
+    await page.locator('#pendingColumn .btn-task-delete').first().click();
     await expect(page.locator('#confirmModal')).toBeVisible();
 
     await page.click('#cancelDeleteBtn');
@@ -157,7 +157,7 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Task B');
     await page.click('#addBtn');
 
-    const deleteButtons = page.locator('.btn-danger.btn-sm');
+    const deleteButtons = page.locator('.btn-task-delete');
     await expect(deleteButtons).toHaveCount(2);
   });
 
@@ -168,7 +168,7 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Task B');
     await page.click('#addBtn');
 
-    const editButtons = page.locator('.btn-primary.btn-sm');
+    const editButtons = page.locator('.btn-task-edit');
     await expect(editButtons).toHaveCount(2);
   });
 
@@ -181,7 +181,7 @@ test.describe('Task Manager', () => {
     await page.fill('#startDate', '2026-07-01');
     await page.click('#addBtn');
 
-    await page.locator('#pendingColumn .btn-primary.btn-sm').first().click();
+    await page.locator('#pendingColumn .btn-task-edit').first().click();
 
     await expect(page.locator('#editModal')).toBeVisible();
     await expect(page.locator('#editTitle')).toHaveValue('Original task');
@@ -193,7 +193,7 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Buy groceries');
     await page.click('#addBtn');
 
-    await page.locator('#pendingColumn .btn-primary.btn-sm').first().click();
+    await page.locator('#pendingColumn .btn-task-edit').first().click();
     await page.fill('#editTitle', 'Buy organic groceries');
     await page.click('#saveEditBtn');
 
@@ -205,7 +205,7 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Task status');
     await page.click('#addBtn');
 
-    await page.locator('#pendingColumn .btn-primary.btn-sm').first().click();
+    await page.locator('#pendingColumn .btn-task-edit').first().click();
     await page.selectOption('#editStatus', 'completed');
     await page.click('#saveEditBtn');
 
@@ -218,18 +218,18 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Dated task');
     await page.click('#addBtn');
 
-    await page.locator('#pendingColumn .btn-primary.btn-sm').first().click();
+    await page.locator('#pendingColumn .btn-task-edit').first().click();
     await page.fill('#editStartDate', '2026-08-01');
     await page.click('#saveEditBtn');
 
-    await expect(page.locator('.task-date').first()).toContainText('Start: 2026-08-01');
+    await expect(page.locator('.task-date').first()).toContainText('1 Aug, 2026');
   });
 
   test('cancel closes edit modal without changes', async ({ page }) => {
     await page.fill('#taskInput', 'Original');
     await page.click('#addBtn');
 
-    await page.locator('#pendingColumn .btn-primary.btn-sm').first().click();
+    await page.locator('#pendingColumn .btn-task-edit').first().click();
     await page.fill('#editTitle', 'Changed');
     await page.click('#cancelEditBtn');
 
@@ -244,7 +244,7 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Task B');
     await page.click('#addBtn');
 
-    await page.locator('#pendingColumn .btn-primary.btn-sm').first().click();
+    await page.locator('#pendingColumn .btn-task-edit').first().click();
     await page.fill('#editTitle', 'Task A edited');
     await page.click('#saveEditBtn');
 
@@ -257,7 +257,7 @@ test.describe('Task Manager', () => {
     await page.fill('#taskInput', 'Persistent');
     await page.click('#addBtn');
 
-    await page.locator('#pendingColumn .btn-primary.btn-sm').first().click();
+    await page.locator('#pendingColumn .btn-task-edit').first().click();
     await page.fill('#editTitle', 'Persistent edited');
     await page.click('#saveEditBtn');
 
@@ -280,7 +280,7 @@ test.describe('Task Manager', () => {
     await page.click('#addBtn');
 
     await expect(page.locator('.task-date')).toHaveCount(1);
-    await expect(page.locator('.task-date').first()).toContainText('Start: 2026-07-01');
+    await expect(page.locator('.task-date').first()).toContainText('1 Jul, 2026');
   });
 
   test('adds task with all fields', async ({ page }) => {
@@ -290,7 +290,7 @@ test.describe('Task Manager', () => {
 
     await expect(page.locator('#pendingColumn li')).toHaveCount(1);
     await expect(page.locator('.task-title').first()).toHaveText('Full task');
-    await expect(page.locator('.task-date').first()).toContainText('Start: 2026-08-01');
+    await expect(page.locator('.task-date').first()).toContainText('1 Aug, 2026');
   });
 
   test('clears all inputs after adding task', async ({ page }) => {
@@ -309,12 +309,14 @@ test.describe('Task Manager', () => {
   });
 
   test('adds a task with default today date', async ({ page }) => {
-    const today = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const expected = `${now.getDate()} ${months[now.getMonth()]}, ${now.getFullYear()}`;
     await page.fill('#taskInput', 'Task with today');
     await page.click('#addBtn');
 
     await expect(page.locator('#pendingColumn li')).toHaveCount(1);
-    await expect(page.locator('.task-date').first()).toContainText(`Start: ${today}`);
+    await expect(page.locator('.task-date').first()).toContainText(expected);
   });
 
   test('date input resets to today after adding task', async ({ page }) => {
@@ -457,7 +459,7 @@ test.describe('Kanban Board Columns', () => {
 
     await page.locator('#pendingColumn li').first().dragTo(page.locator('#inProgressColumn'));
 
-    await page.locator('#inProgressColumn .btn-danger.btn-sm').first().click();
+    await page.locator('#inProgressColumn .btn-task-delete').first().click();
     await page.click('#confirmDeleteBtn');
 
     await expect(page.locator('#inProgressColumn li')).toHaveCount(0);
@@ -467,7 +469,7 @@ test.describe('Kanban Board Columns', () => {
     await page.fill('#taskInput', 'Original title');
     await page.click('#addBtn');
 
-    await page.locator('#pendingColumn .btn-primary.btn-sm').first().click();
+    await page.locator('#pendingColumn .btn-task-edit').first().click();
     await page.fill('#editTitle', 'Updated title');
     await page.click('#saveEditBtn');
 

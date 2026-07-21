@@ -20,6 +20,20 @@ const pendingZone = pendingColumn.closest('.kanban-zone');
 const inProgressZone = inProgressColumn.closest('.kanban-zone');
 const completedZone = completedColumn.closest('.kanban-zone');
 
+const pendingCountEl = document.getElementById('pendingCount');
+const inProgressCountEl = document.getElementById('inProgressCount');
+const completedCountEl = document.getElementById('completedCount');
+const pendingBarEl = document.getElementById('pendingBar');
+const inProgressBarEl = document.getElementById('inProgressBar');
+const completedBarEl = document.getElementById('completedBar');
+const inProgressBadgeEl = document.getElementById('inProgressBadge');
+const progressSubtitleEl = document.getElementById('progressSubtitle');
+const progressPercentEl = document.getElementById('progressPercent');
+const progressRingFillEl = document.getElementById('progressRingFill');
+const addTaskSection = document.getElementById('addTaskSection');
+
+const CIRCUMFERENCE = 2 * Math.PI * 30;
+
 let tasks = [];
 let nextId = 1;
 let editingTaskId = null;
@@ -35,6 +49,13 @@ function getTodayDate() {
   const month = String(now.getMonth() + 1).padStart(2, '0');
   const day = String(now.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${d.getDate()} ${months[d.getMonth()]}, ${d.getFullYear()}`;
 }
 
 function loadState() {
@@ -68,7 +89,7 @@ function saveState() {
     localStorage.setItem('tasks', JSON.stringify(tasks));
     localStorage.setItem('nextId', nextId.toString());
   } catch {
-    // storage unavailable — state is lost on reload
+    // storage unavailable
   }
 }
 
@@ -172,6 +193,46 @@ function getTasksInStatus(status) {
   return tasks.filter(t => t.status === status).sort((a, b) => a.order - b.order);
 }
 
+function getStatusBadgeClass(status) {
+  switch (status) {
+    case 'pending': return 'badge-todo';
+    case 'in-progress': return 'badge-progress';
+    case 'completed': return 'badge-done';
+    default: return 'badge-todo';
+  }
+}
+
+function getStatusIconClass(status) {
+  switch (status) {
+    case 'pending': return 'badge-icon-todo';
+    case 'in-progress': return 'badge-icon-progress';
+    case 'completed': return 'badge-icon-done';
+    default: return 'badge-icon-todo';
+  }
+}
+
+function getStatusLabel(status) {
+  switch (status) {
+    case 'pending': return 'To-do';
+    case 'in-progress': return 'In Progress';
+    case 'completed': return 'Done';
+    default: return 'To-do';
+  }
+}
+
+function getStatusIcon(status) {
+  switch (status) {
+    case 'pending':
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>';
+    case 'in-progress':
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+    case 'completed':
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+    default:
+      return '';
+  }
+}
+
 function createTaskElement(task) {
   const li = document.createElement('li');
   li.className = 'list-group-item d-flex justify-content-between align-items-center';
@@ -188,10 +249,15 @@ function createTaskElement(task) {
 
   if (task.startDate) {
     const startSpan = document.createElement('span');
-    startSpan.textContent = `Start: ${task.startDate}`;
     startSpan.className = 'task-date';
+    startSpan.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ' + formatDate(task.startDate);
     taskInfo.appendChild(startSpan);
   }
+
+  const badge = document.createElement('div');
+  badge.className = 'task-status-badge ' + getStatusBadgeClass(task.status);
+  badge.innerHTML = '<span class="badge-icon ' + getStatusIconClass(task.status) + '">' + getStatusIcon(task.status) + '</span>' + getStatusLabel(task.status);
+  taskInfo.appendChild(badge);
 
   li.appendChild(taskInfo);
 
@@ -199,14 +265,16 @@ function createTaskElement(task) {
   actionsDiv.className = 'task-actions';
 
   const editBtn = document.createElement('button');
-  editBtn.textContent = 'Edit';
-  editBtn.className = 'btn btn-primary btn-sm';
+  editBtn.className = 'btn-task btn-task-edit';
+  editBtn.setAttribute('aria-label', 'Edit task');
+  editBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
   editBtn.addEventListener('click', () => showEditModal(task.id));
   actionsDiv.appendChild(editBtn);
 
   const deleteBtn = document.createElement('button');
-  deleteBtn.textContent = 'Delete';
-  deleteBtn.className = 'btn btn-danger btn-sm';
+  deleteBtn.className = 'btn-task btn-task-delete';
+  deleteBtn.setAttribute('aria-label', 'Delete task');
+  deleteBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
   deleteBtn.addEventListener('click', () => deleteTask(task.id));
   actionsDiv.appendChild(deleteBtn);
 
@@ -219,6 +287,35 @@ function createTaskElement(task) {
   li.addEventListener('drop', handleTaskDrop);
 
   return li;
+}
+
+function updateProgressStats() {
+  const total = tasks.length;
+  const completed = tasks.filter(t => t.status === 'completed').length;
+  const pending = tasks.filter(t => t.status === 'pending').length;
+  const inProgress = tasks.filter(t => t.status === 'in-progress').length;
+
+  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const offset = CIRCUMFERENCE - (pct / 100) * CIRCUMFERENCE;
+
+  progressRingFillEl.style.strokeDashoffset = offset;
+  progressPercentEl.textContent = pct + '%';
+  progressSubtitleEl.textContent = completed + ' of ' + total + ' tasks completed';
+
+  pendingCountEl.textContent = pending + ' Task' + (pending !== 1 ? 's' : '');
+  inProgressCountEl.textContent = inProgress + ' Task' + (inProgress !== 1 ? 's' : '');
+  completedCountEl.textContent = completed + ' Task' + (completed !== 1 ? 's' : '');
+  inProgressBadgeEl.textContent = inProgress;
+
+  if (total > 0) {
+    pendingBarEl.style.width = Math.round((pending / total) * 100) + '%';
+    inProgressBarEl.style.width = Math.round((inProgress / total) * 100) + '%';
+    completedBarEl.style.width = Math.round((completed / total) * 100) + '%';
+  } else {
+    pendingBarEl.style.width = '0%';
+    inProgressBarEl.style.width = '0%';
+    completedBarEl.style.width = '0%';
+  }
 }
 
 function renderTasks() {
@@ -241,6 +338,8 @@ function renderTasks() {
   completedTasks.forEach(task => {
     completedColumn.appendChild(createTaskElement(task));
   });
+
+  updateProgressStats();
 }
 
 function handleDragStart(e) {
@@ -392,6 +491,40 @@ function handleZoneDrop(e) {
   renderTasks();
 }
 
+function setupBottomNav() {
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      navItems.forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+
+      const tab = item.dataset.tab;
+      if (tab === 'add') {
+        addTaskSection.scrollIntoView({ behavior: 'smooth' });
+        taskInput.focus();
+      } else if (tab === 'home') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+  });
+}
+
+function setupTaskGroupCards() {
+  const cards = document.querySelectorAll('.task-group-card');
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      const filter = card.dataset.filter;
+      const zone = document.querySelector('.kanban-zone[data-status="' + filter + '"]');
+      if (zone) {
+        zone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        zone.style.transition = 'background-color 0.3s';
+        zone.style.backgroundColor = 'rgba(95,51,225,0.06)';
+        setTimeout(() => { zone.style.backgroundColor = ''; }, 800);
+      }
+    });
+  });
+}
+
 [pendingZone, inProgressZone, completedZone].forEach(zone => {
   zone.addEventListener('dragover', handleDragOver);
   zone.addEventListener('dragleave', handleDragLeave);
@@ -407,3 +540,5 @@ cancelEditBtn.addEventListener('click', hideEditModal);
 loadState();
 renderTasks();
 startDateInput.value = getTodayDate();
+setupBottomNav();
+setupTaskGroupCards();
