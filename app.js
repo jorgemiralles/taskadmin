@@ -12,6 +12,13 @@ const editStatus = document.getElementById('editStatus');
 const saveEditBtn = document.getElementById('saveEditBtn');
 const cancelEditBtn = document.getElementById('cancelEditBtn');
 
+const taskDetailsModal = document.getElementById('taskDetailsModal');
+const detailsTitle = document.getElementById('detailsTitle');
+const detailsStatus = document.getElementById('detailsStatus');
+const detailsStartDate = document.getElementById('detailsStartDate');
+const editFromDetailsBtn = document.getElementById('editFromDetailsBtn');
+const closeDetailsBtn = document.getElementById('closeDetailsBtn');
+
 const pendingColumn = document.getElementById('pendingColumn');
 const inProgressColumn = document.getElementById('inProgressColumn');
 const completedColumn = document.getElementById('completedColumn');
@@ -42,6 +49,9 @@ let draggedTaskId = null;
 
 const confirmBootstrapModal = new bootstrap.Modal(confirmModal);
 const editBootstrapModal = new bootstrap.Modal(editModal);
+const taskDetailsBootstrapModal = new bootstrap.Modal(taskDetailsModal);
+
+let viewingTaskId = null;
 
 function getTodayDate() {
   const now = new Date();
@@ -114,6 +124,29 @@ function showEditModal(id) {
 function hideEditModal() {
   editingTaskId = null;
   editBootstrapModal.hide();
+}
+
+function showTaskDetailsModal(id) {
+  const task = tasks.find(t => t.id === id);
+  if (!task) return;
+
+  viewingTaskId = id;
+  detailsTitle.textContent = task.title;
+  detailsStatus.innerHTML = '<span class="task-status-badge ' + getStatusBadgeClass(task.status) + '"><span class="badge-icon ' + getStatusIconClass(task.status) + '">' + getStatusIcon(task.status) + '</span>' + getStatusLabel(task.status) + '</span>';
+  detailsStartDate.textContent = task.startDate ? formatDate(task.startDate) : 'Not set';
+  taskDetailsBootstrapModal.show();
+}
+
+function hideTaskDetailsModal() {
+  viewingTaskId = null;
+  taskDetailsBootstrapModal.hide();
+}
+
+function editFromDetails() {
+  if (viewingTaskId === null) return;
+  const taskId = viewingTaskId;
+  hideTaskDetailsModal();
+  showEditModal(taskId);
 }
 
 function saveEdit() {
@@ -245,6 +278,8 @@ function createTaskElement(task) {
   const titleSpan = document.createElement('span');
   titleSpan.textContent = task.title;
   titleSpan.className = 'task-title';
+  titleSpan.style.cursor = 'pointer';
+  titleSpan.addEventListener('click', () => showTaskDetailsModal(task.id));
   taskInfo.appendChild(titleSpan);
 
   if (task.startDate) {
@@ -536,6 +571,8 @@ confirmDeleteBtn.addEventListener('click', confirmDelete);
 cancelDeleteBtn.addEventListener('click', cancelDelete);
 saveEditBtn.addEventListener('click', saveEdit);
 cancelEditBtn.addEventListener('click', hideEditModal);
+editFromDetailsBtn.addEventListener('click', editFromDetails);
+closeDetailsBtn.addEventListener('click', hideTaskDetailsModal);
 
 loadState();
 renderTasks();

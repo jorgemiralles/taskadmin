@@ -377,6 +377,12 @@ body{
 .kanban-column::-webkit-scrollbar-track,.kanban-zone::-webkit-scrollbar-track{background:transparent}
 .kanban-column::-webkit-scrollbar-thumb,.kanban-zone::-webkit-scrollbar-thumb{background:var(--input-bg);border-radius:2px}
 
+/* Task Details Modal */
+.task-details-content{display:flex;flex-direction:column;gap:16px}
+.task-details-row{display:flex;flex-direction:column;gap:4px}
+.task-details-label{font-size:11px;font-weight:500;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px}
+.task-details-value{font-size:14px;font-weight:500;color:var(--text)}
+
 /* Responsive */
 @media(max-width:480px){
   body{background:var(--bg)}
