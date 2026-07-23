@@ -41,7 +41,7 @@ const addTaskSection = document.getElementById('addTaskSection');
 
 const CIRCUMFERENCE = 2 * Math.PI * 30;
 
-const API_URL = `http://${window.location.hostname}:3000/api/tasks`;
+const API_URL = '/api/tasks';
 
 let tasks = [];
 let editingTaskId = null;
