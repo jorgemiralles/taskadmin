@@ -56,6 +56,9 @@
 - **Port:** 3000
 - **Dependencies:** `express`, `pg`
 - **Start:** `node server.js` or `npm start`
+- **Start (daemon):** `nohup npm start > /tmp/express.log 2>&1 &`
+- **Stop:** `kill -9 $(pgrep -f "node server")`
+- **Restart:** `kill -9 $(pgrep -f "node server"); sleep 1; nohup npm start > /tmp/express.log 2>&1 &`
 - **Endpoints:** `GET/POST /api/tasks`, `GET/PUT/DELETE /api/tasks/:id`
 - **DB connection:** `db.js` (pool)
 
