@@ -4,6 +4,7 @@ services:
     runtime: node
     buildCommand: npm install
     startCommand: npm start
+    postDeployCommand: npm run migrate
     envVars:
       - key: DATABASE_URL
         sync: false
