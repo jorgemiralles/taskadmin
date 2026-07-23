@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node server.js",
+    "migrate": "node migrate.js",
     "test": "playwright test",
     "test:headed": "playwright test --headed"
   },
