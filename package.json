@@ -4,6 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
+    "start": "node server.js",
     "test": "playwright test",
     "test:headed": "playwright test --headed"
   },
@@ -19,6 +20,10 @@
     "url": "https://github.com/jorgemiralles/taskadmin/issues"
   },
   "homepage": "https://github.com/jorgemiralles/taskadmin#readme",
+  "dependencies": {
+    "express": "^4.21.0",
+    "pg": "^8.13.0"
+  },
   "devDependencies": {
     "@playwright/test": "^1.61.1"
   }

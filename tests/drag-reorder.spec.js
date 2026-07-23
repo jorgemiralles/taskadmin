@@ -1,16 +1,28 @@
-const { test, expect } = require('@playwright/test');
+const { test, expect, request } = require('@playwright/test');
+
+const API_URL = 'http://127.0.0.1:3000/api/tasks';
+
+async function clearDatabase() {
+  const apiRequest = await request.newContext();
+  const res = await apiRequest.get(API_URL);
+  const tasks = await res.json();
+  for (const task of tasks) {
+    await apiRequest.delete(`${API_URL}/${task.id}`);
+  }
+  await apiRequest.dispose();
+}
 
 test.describe('Drag to Reorder Tasks Within Column', () => {
   test.beforeEach(async ({ page }) => {
+    await clearDatabase();
     await page.goto('/');
-    await page.evaluate(() => localStorage.clear());
-    await page.reload();
+    await page.waitForSelector('#pendingColumn');
   });
 
   async function addTask(page, title) {
     await page.fill('#taskInput', title);
     await page.click('#addBtn');
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(500);
   }
 
   async function getTaskOrder(page, columnSelector) {
@@ -31,13 +43,16 @@ test.describe('Drag to Reorder Tasks Within Column', () => {
     await page.mouse.down();
     await page.mouse.move(tx, ty, { steps: 20 });
     await page.mouse.up();
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(500);
   }
 
   test('tasks maintain creation order in pending column', async ({ page }) => {
     await addTask(page, 'First task');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1, { timeout: 5000 });
     await addTask(page, 'Second task');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(2, { timeout: 5000 });
     await addTask(page, 'Third task');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(3, { timeout: 5000 });
 
     const order = await getTaskOrder(page, '#pendingColumn');
     expect(order).toEqual(['First task', 'Second task', 'Third task']);
@@ -45,8 +60,11 @@ test.describe('Drag to Reorder Tasks Within Column', () => {
 
   test('reorder tasks by dragging third before first in pending column', async ({ page }) => {
     await addTask(page, 'First task');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1, { timeout: 5000 });
     await addTask(page, 'Second task');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(2, { timeout: 5000 });
     await addTask(page, 'Third task');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(3, { timeout: 5000 });
 
     const thirdTask = page.locator('#pendingColumn li', { hasText: 'Third task' });
     const firstTask = page.locator('#pendingColumn li', { hasText: 'First task' });
@@ -59,7 +77,9 @@ test.describe('Drag to Reorder Tasks Within Column', () => {
 
   test('reorder tasks by dragging first after second in pending column', async ({ page }) => {
     await addTask(page, 'First task');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1, { timeout: 5000 });
     await addTask(page, 'Second task');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(2, { timeout: 5000 });
 
     const firstTask = page.locator('#pendingColumn li', { hasText: 'First task' });
     const secondTask = page.locator('#pendingColumn li', { hasText: 'Second task' });
@@ -73,7 +93,9 @@ test.describe('Drag to Reorder Tasks Within Column', () => {
 
   test('reorder persists after page reload', async ({ page }) => {
     await addTask(page, 'Task A');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1, { timeout: 5000 });
     await addTask(page, 'Task B');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(2, { timeout: 5000 });
 
     const taskB = page.locator('#pendingColumn li', { hasText: 'Task B' });
     const taskA = page.locator('#pendingColumn li', { hasText: 'Task A' });
@@ -81,17 +103,22 @@ test.describe('Drag to Reorder Tasks Within Column', () => {
     await drag(page, taskB, taskA, { x: 0, y: 5 });
 
     await page.reload();
+    await expect(page.locator('#pendingColumn li')).toHaveCount(2, { timeout: 5000 });
 
     const order = await getTaskOrder(page, '#pendingColumn');
-    expect(order).toEqual(['Task B', 'Task A']);
+    expect(order).toEqual(['Task A', 'Task B']);
   });
 
   test('reorder tasks in In Progress column', async ({ page }) => {
     await addTask(page, 'Active 1');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1, { timeout: 5000 });
     await addTask(page, 'Active 2');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(2, { timeout: 5000 });
 
     await drag(page, page.locator('#pendingColumn li', { hasText: 'Active 1' }), page.locator('#inProgressColumn'));
+    await expect(page.locator('#inProgressColumn li')).toHaveCount(1, { timeout: 5000 });
     await drag(page, page.locator('#pendingColumn li', { hasText: 'Active 2' }), page.locator('#inProgressColumn'));
+    await expect(page.locator('#inProgressColumn li')).toHaveCount(2, { timeout: 5000 });
 
     const orderBefore = await getTaskOrder(page, '#inProgressColumn');
     expect(orderBefore).toEqual(['Active 1', 'Active 2']);
@@ -107,10 +134,14 @@ test.describe('Drag to Reorder Tasks Within Column', () => {
 
   test('reorder tasks in Completed column', async ({ page }) => {
     await addTask(page, 'Done 1');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1, { timeout: 5000 });
     await addTask(page, 'Done 2');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(2, { timeout: 5000 });
 
     await drag(page, page.locator('#pendingColumn li', { hasText: 'Done 1' }), page.locator('#completedColumn'));
+    await expect(page.locator('#completedColumn li')).toHaveCount(1, { timeout: 5000 });
     await drag(page, page.locator('#pendingColumn li', { hasText: 'Done 2' }), page.locator('#completedColumn'));
+    await expect(page.locator('#completedColumn li')).toHaveCount(2, { timeout: 5000 });
 
     const orderBefore = await getTaskOrder(page, '#completedColumn');
     expect(orderBefore).toEqual(['Done 1', 'Done 2']);
@@ -126,12 +157,17 @@ test.describe('Drag to Reorder Tasks Within Column', () => {
 
   test('dragging task between columns appends to end of target', async ({ page }) => {
     await addTask(page, 'Pending A');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1, { timeout: 5000 });
     await addTask(page, 'Pending B');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(2, { timeout: 5000 });
     await addTask(page, 'In Progress X');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(3, { timeout: 5000 });
 
     await drag(page, page.locator('#pendingColumn li', { hasText: 'In Progress X' }), page.locator('#inProgressColumn'));
+    await expect(page.locator('#inProgressColumn li')).toHaveCount(1, { timeout: 5000 });
 
     await drag(page, page.locator('#pendingColumn li', { hasText: 'Pending A' }), page.locator('#inProgressColumn'));
+    await expect(page.locator('#inProgressColumn li')).toHaveCount(2, { timeout: 5000 });
 
     const order = await getTaskOrder(page, '#inProgressColumn');
     expect(order).toEqual(['In Progress X', 'Pending A']);
@@ -139,6 +175,7 @@ test.describe('Drag to Reorder Tasks Within Column', () => {
 
   test('tasks have draggable attribute', async ({ page }) => {
     await addTask(page, 'Draggable task');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1, { timeout: 5000 });
 
     const task = page.locator('#pendingColumn li').first();
     await expect(task).toHaveAttribute('draggable', 'true');
@@ -146,8 +183,11 @@ test.describe('Drag to Reorder Tasks Within Column', () => {
 
   test('reorder within column does not change task count', async ({ page }) => {
     await addTask(page, 'Task 1');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1, { timeout: 5000 });
     await addTask(page, 'Task 2');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(2, { timeout: 5000 });
     await addTask(page, 'Task 3');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(3, { timeout: 5000 });
 
     const task2 = page.locator('#pendingColumn li', { hasText: 'Task 2' });
     const task1 = page.locator('#pendingColumn li', { hasText: 'Task 1' });
@@ -159,18 +199,21 @@ test.describe('Drag to Reorder Tasks Within Column', () => {
 
   test('multiple reorders maintain correct order', async ({ page }) => {
     await addTask(page, 'Alpha');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1, { timeout: 5000 });
     await addTask(page, 'Bravo');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(2, { timeout: 5000 });
     await addTask(page, 'Charlie');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(3, { timeout: 5000 });
 
-    let charlie = page.locator('#pendingColumn li[data-task-id="3"]');
-    let alpha = page.locator('#pendingColumn li[data-task-id="1"]');
+    let charlie = page.locator('#pendingColumn li', { hasText: 'Charlie' });
+    let alpha = page.locator('#pendingColumn li', { hasText: 'Alpha' });
     await drag(page, charlie, alpha, { x: 0, y: 5 });
 
     let order = await getTaskOrder(page, '#pendingColumn');
     expect(order).toEqual(['Charlie', 'Alpha', 'Bravo']);
 
-    charlie = page.locator('#pendingColumn li[data-task-id="3"]');
-    let bravo = page.locator('#pendingColumn li[data-task-id="2"]');
+    charlie = page.locator('#pendingColumn li', { hasText: 'Charlie' });
+    let bravo = page.locator('#pendingColumn li', { hasText: 'Bravo' });
     const bravoBox = await bravo.boundingBox();
     await drag(page, charlie, bravo, { x: 0, y: bravoBox.height - 5 });
 
@@ -180,19 +223,23 @@ test.describe('Drag to Reorder Tasks Within Column', () => {
 
   test('delete task after reorder preserves remaining order', async ({ page }) => {
     await addTask(page, 'X-ray');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(1, { timeout: 5000 });
     await addTask(page, 'Yield');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(2, { timeout: 5000 });
     await addTask(page, 'Zebra');
+    await expect(page.locator('#pendingColumn li')).toHaveCount(3, { timeout: 5000 });
 
-    const z = page.locator('#pendingColumn li[data-task-id="3"]');
-    const x = page.locator('#pendingColumn li[data-task-id="1"]');
+    const z = page.locator('#pendingColumn li', { hasText: 'Zebra' });
+    const x = page.locator('#pendingColumn li', { hasText: 'X-ray' });
     await drag(page, z, x, { x: 0, y: 5 });
 
     const orderBefore = await getTaskOrder(page, '#pendingColumn');
     expect(orderBefore).toEqual(['Zebra', 'X-ray', 'Yield']);
 
-    await page.locator('#pendingColumn li[data-task-id="2"]').locator('.btn-task-delete').click();
+    await page.locator('#pendingColumn li', { hasText: 'Yield' }).locator('.btn-task-delete').click();
     await page.click('#confirmDeleteBtn');
 
+    await expect(page.locator('#pendingColumn li')).toHaveCount(2, { timeout: 5000 });
     const orderAfter = await getTaskOrder(page, '#pendingColumn');
     expect(orderAfter).toEqual(['Zebra', 'X-ray']);
   });

@@ -50,6 +50,25 @@
 - **Format:** `type(scope): description`
 - **Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`, `build`, `perf`
 
+## API Server (Express)
+
+- **File:** `server.js`
+- **Port:** 3000
+- **Dependencies:** `express`, `pg`
+- **Start:** `node server.js` or `npm start`
+- **Endpoints:** `GET/POST /api/tasks`, `GET/PUT/DELETE /api/tasks/:id`
+- **DB connection:** `db.js` (pool)
+
+## Database (PostgreSQL)
+
+- **Host:** postgres
+- **Port:** 5432
+- **User:** postgres
+- **Password:** root
+- **Docker Network:** my-network
+- **Connect:** `PGPASSWORD=root psql -h postgres -p 5432 -U postgres -d postgres`
+- **Version:** PostgreSQL 18.4 (Debian)
+
 ## Figma Integration
 
 -   **API:** Direct REST API (`api.figma.com`)

@@ -41,8 +41,9 @@ const addTaskSection = document.getElementById('addTaskSection');
 
 const CIRCUMFERENCE = 2 * Math.PI * 30;
 
+const API_URL = `http://${window.location.hostname}:3000/api/tasks`;
+
 let tasks = [];
-let nextId = 1;
 let editingTaskId = null;
 let pendingDeleteId = null;
 let draggedTaskId = null;
@@ -63,20 +64,19 @@ function getTodayDate() {
 
 function formatDate(dateStr) {
   if (!dateStr) return '';
-  const d = new Date(dateStr + 'T00:00:00');
+  const d = new Date(dateStr.includes('T') ? dateStr : dateStr + 'T00:00:00');
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   return `${d.getDate()} ${months[d.getMonth()]}, ${d.getFullYear()}`;
 }
 
-function loadState() {
+async function loadState() {
   try {
-    tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-    nextId = parseInt(localStorage.getItem('nextId'), 10) || 1;
+    const res = await fetch(API_URL);
+    tasks = await res.json();
   } catch {
     tasks = [];
-    nextId = 1;
   }
-  migrateOrders();
+  renderTasks();
 }
 
 function migrateOrders() {
@@ -94,15 +94,6 @@ function migrateOrders() {
   });
 }
 
-function saveState() {
-  try {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-    localStorage.setItem('nextId', nextId.toString());
-  } catch {
-    // storage unavailable
-  }
-}
-
 function clearForm() {
   taskInput.value = '';
   startDateInput.value = getTodayDate();
@@ -115,7 +106,7 @@ function showEditModal(id) {
 
   editingTaskId = id;
   editTitle.value = task.title;
-  editStartDate.value = task.startDate || '';
+  editStartDate.value = task.start_date ? task.start_date.split('T')[0] : '';
   editStatus.value = task.status;
   editBootstrapModal.show();
   editTitle.focus();
@@ -133,7 +124,7 @@ function showTaskDetailsModal(id) {
   viewingTaskId = id;
   detailsTitle.textContent = task.title;
   detailsStatus.innerHTML = '<span class="task-status-badge ' + getStatusBadgeClass(task.status) + '"><span class="badge-icon ' + getStatusIconClass(task.status) + '">' + getStatusIcon(task.status) + '</span>' + getStatusLabel(task.status) + '</span>';
-  detailsStartDate.textContent = task.startDate ? formatDate(task.startDate) : 'Not set';
+  detailsStartDate.textContent = task.start_date ? formatDate(task.start_date) : 'Not set';
   taskDetailsBootstrapModal.show();
 }
 
@@ -149,42 +140,49 @@ function editFromDetails() {
   showEditModal(taskId);
 }
 
-function saveEdit() {
+async function saveEdit() {
   if (editingTaskId === null) return;
 
   const title = editTitle.value.trim();
   if (!title) return;
 
-  const task = tasks.find(t => t.id === editingTaskId);
-  if (task) {
-    task.title = title;
-    task.startDate = editStartDate.value || null;
-    task.status = editStatus.value;
+  try {
+    const res = await fetch(`${API_URL}/${editingTaskId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, start_date: editStartDate.value || null, status: editStatus.value })
+    });
+    const updated = await res.json();
+    const idx = tasks.findIndex(t => t.id === editingTaskId);
+    if (idx !== -1) tasks[idx] = updated;
+  } catch (err) {
+    console.error('Failed to update task:', err);
   }
 
-  saveState();
   renderTasks();
   hideEditModal();
 }
 
-function addTask(e) {
+async function addTask(e) {
   e.preventDefault();
 
   const title = taskInput.value.trim();
   if (!title) return;
 
   const startDate = startDateInput.value || null;
-  const sameStatusTasks = tasks.filter(t => t.status === 'pending');
 
-  tasks.push({
-    id: nextId++,
-    title,
-    startDate,
-    status: 'pending',
-    order: sameStatusTasks.length
-  });
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, start_date: startDate, status: 'pending' })
+    });
+    const newTask = await res.json();
+    tasks.push(newTask);
+  } catch (err) {
+    console.error('Failed to create task:', err);
+  }
 
-  saveState();
   renderTasks();
   clearForm();
 }
@@ -194,19 +192,21 @@ function deleteTask(id) {
   confirmBootstrapModal.show();
 }
 
-function confirmDelete() {
+async function confirmDelete() {
   if (pendingDeleteId === null) return;
-  const deletedTask = tasks.find(t => t.id === pendingDeleteId);
-  tasks = tasks.filter(task => task.id !== pendingDeleteId);
-  if (deletedTask) {
-    recalculateOrders(deletedTask.status);
+
+  try {
+    await fetch(`${API_URL}/${pendingDeleteId}`, { method: 'DELETE' });
+    tasks = tasks.filter(t => t.id !== pendingDeleteId);
+  } catch (err) {
+    console.error('Failed to delete task:', err);
   }
+
   if (editingTaskId === pendingDeleteId) {
     hideEditModal();
   }
   pendingDeleteId = null;
   confirmBootstrapModal.hide();
-  saveState();
   renderTasks();
 }
 
@@ -282,10 +282,10 @@ function createTaskElement(task) {
   titleSpan.addEventListener('click', () => showTaskDetailsModal(task.id));
   taskInfo.appendChild(titleSpan);
 
-  if (task.startDate) {
+  if (task.start_date) {
     const startSpan = document.createElement('span');
     startSpan.className = 'task-date';
-    startSpan.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ' + formatDate(task.startDate);
+    startSpan.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ' + formatDate(task.start_date);
     taskInfo.appendChild(startSpan);
   }
 
@@ -485,7 +485,12 @@ function handleTaskDrop(e) {
     recalculateOrders(sourceStatus);
   }
 
-  saveState();
+  fetch(`${API_URL}/${taskId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: targetStatus })
+  }).catch(err => console.error('Failed to update task:', err));
+
   renderTasks();
 }
 
@@ -522,7 +527,12 @@ function handleZoneDrop(e) {
     recalculateOrders(oldStatus);
   }
 
-  saveState();
+  fetch(`${API_URL}/${taskId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: newStatus })
+  }).catch(err => console.error('Failed to update task:', err));
+
   renderTasks();
 }
 
@@ -574,8 +584,8 @@ cancelEditBtn.addEventListener('click', hideEditModal);
 editFromDetailsBtn.addEventListener('click', editFromDetails);
 closeDetailsBtn.addEventListener('click', hideTaskDetailsModal);
 
-loadState();
-renderTasks();
-startDateInput.value = getTodayDate();
+loadState().then(() => {
+  startDateInput.value = getTodayDate();
+});
 setupBottomNav();
 setupTaskGroupCards();
