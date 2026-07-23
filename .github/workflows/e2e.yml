@@ -17,11 +17,6 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Install darkhttpd
-        run: |
-          curl -sL https://github.com/ryanmjacobs/darkhttpd/releases/download/r2/darkhttpd-x86_64.deb -o darkhttpd.deb
-          sudo dpkg -i darkhttpd.deb
-
       - name: Install dependencies
         run: npm ci
 
