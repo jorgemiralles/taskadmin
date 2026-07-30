@@ -24,6 +24,7 @@ function renderTaskList() {
   container.innerHTML = tasks.map(task => `
     <div class="task-card">
       <h3>${escapeHtml(task.title)}</h3>
+      ${task.description ? `<p class="task-desc">${escapeHtml(task.description)}</p>` : ''}
       <p class="task-date">${new Date(task.createdAt).toLocaleDateString()}</p>
     </div>
   `).join('');
