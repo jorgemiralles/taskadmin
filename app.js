@@ -36,11 +36,14 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+let flashTimer;
+
 function showFlash(message) {
   const flash = document.getElementById('flash');
   flash.textContent = message;
   flash.classList.remove('hidden');
-  setTimeout(() => flash.classList.add('hidden'), 3000);
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => flash.classList.add('hidden'), 3000);
 }
 
 // Navigation

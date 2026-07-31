@@ -11,19 +11,24 @@ async function seedTasks(page, tasks = SEED_TASKS) {
   }, tasks);
 }
 
-async function getStoredTasks(page) {
+function getStoredTasks(page) {
   return page.evaluate(() => JSON.parse(localStorage.getItem('tasks') || '[]'));
+}
+
+async function createTask(page, { title, description = '' }) {
+  await page.fill('#task-title', title);
+  await page.fill('#task-desc', description);
+  await page.click('#submit-btn');
 }
 
 test.describe('Create a new task', () => {
   test('creates a task and shows it in the list', async ({ page }) => {
     await page.goto('/');
 
-    await page.fill('#task-title', 'Buy groceries');
-    await page.fill('#task-desc', 'Milk, eggs, bread');
-    await page.click('#submit-btn');
+    await createTask(page, { title: 'Buy groceries', description: 'Milk, eggs, bread' });
 
     await expect(page.locator('#flash')).toHaveText('Task created successfully');
+    await expect(page.locator('#flash')).toBeVisible();
     await expect(page.locator('#page-list')).toBeVisible();
     await expect(page.locator('.task-card').filter({ hasText: 'Buy groceries' })).toBeVisible();
   });
@@ -31,9 +36,7 @@ test.describe('Create a new task', () => {
   test('persists the created task to localStorage', async ({ page }) => {
     await page.goto('/');
 
-    await page.fill('#task-title', 'Buy groceries');
-    await page.fill('#task-desc', 'Milk, eggs, bread');
-    await page.click('#submit-btn');
+    await createTask(page, { title: 'Buy groceries', description: 'Milk, eggs, bread' });
 
     const stored = await getStoredTasks(page);
     expect(stored).toHaveLength(1);
@@ -46,10 +49,9 @@ test.describe('Create a new task', () => {
   test('trims surrounding whitespace from title and description', async ({ page }) => {
     await page.goto('/');
 
-    await page.fill('#task-title', '  Buy groceries  ');
-    await page.fill('#task-desc', '  Milk, eggs, bread  ');
-    await page.click('#submit-btn');
+    await createTask(page, { title: '  Buy groceries  ', description: '  Milk, eggs, bread  ' });
 
+    await expect.poll(() => getStoredTasks(page)).toHaveLength(1);
     const stored = await getStoredTasks(page);
     expect(stored[0].title).toBe('Buy groceries');
     expect(stored[0].description).toBe('Milk, eggs, bread');
@@ -63,7 +65,7 @@ test.describe('Create a new task', () => {
 
     await expect(page.locator('#flash')).toHaveClass(/hidden/);
     await expect(page.locator('#page-create')).toBeVisible();
-    expect(await getStoredTasks(page)).toHaveLength(0);
+    await expect.poll(() => getStoredTasks(page)).toHaveLength(0);
   });
 
   test('escapes HTML in title and description', async ({ page }) => {
@@ -71,9 +73,7 @@ test.describe('Create a new task', () => {
     const description = '<script>alert("xss")</script>';
 
     await page.goto('/');
-    await page.fill('#task-title', title);
-    await page.fill('#task-desc', description);
-    await page.click('#submit-btn');
+    await createTask(page, { title, description });
 
     const card = page.locator('.task-card').filter({ hasText: 'alert' });
     await expect(card).toBeVisible();
@@ -87,22 +87,19 @@ test.describe('Create a new task', () => {
     await page.clock.install();
     await page.goto('/');
 
-    await page.fill('#task-title', 'Buy groceries');
-    await page.click('#submit-btn');
+    await createTask(page, { title: 'Buy groceries' });
 
     await expect(page.locator('#flash')).toHaveText('Task created successfully');
-    await expect(page.locator('#flash')).not.toHaveClass(/hidden/);
+    await expect(page.locator('#flash')).toBeVisible();
 
     await page.clock.fastForward(3500);
-    await expect(page.locator('#flash')).toHaveClass(/hidden/);
+    await expect(page.locator('#flash')).toBeHidden();
   });
 
   test('keeps the created task after a page reload', async ({ page }) => {
     await page.goto('/');
 
-    await page.fill('#task-title', 'Persisted task');
-    await page.click('#submit-btn');
-
+    await createTask(page, { title: 'Persisted task' });
     await page.reload();
     await page.click('#nav-list');
 
@@ -135,9 +132,12 @@ test.describe('List all tasks', () => {
     await page.goto('/');
     await page.click('#nav-list');
 
+    const expectedDate = await page.evaluate(
+      () => new Date('2026-07-31T10:00:00.000Z').toLocaleDateString()
+    );
     const card = page.locator('.task-card').filter({ hasText: 'Buy groceries' });
     await expect(card.locator('.task-desc')).toHaveText('Milk, eggs, bread');
-    await expect(card.locator('.task-date')).toHaveText(/\d{1,2}\/\d{1,2}\/2026/);
+    await expect(card.locator('.task-date')).toHaveText(expectedDate);
   });
 
   test('omits the description when it is empty', async ({ page }) => {

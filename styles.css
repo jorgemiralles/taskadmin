@@ -105,7 +105,7 @@ main section h2 {
 
 .flash {
   padding: 10px 14px;
-  margin-top: 16px;
+  margin: 0 0 16px;
   border-radius: 6px;
   background: #d4edda;
   color: #155724;
