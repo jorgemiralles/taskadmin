@@ -101,7 +101,6 @@ test.describe('Create a new task', () => {
 
     await createTask(page, { title: 'Persisted task' });
     await page.reload();
-    await page.click('#nav-list');
 
     await expect(page.locator('.task-card').filter({ hasText: 'Persisted task' })).toBeVisible();
   });
@@ -111,7 +110,6 @@ test.describe('List all tasks', () => {
   test('shows existing tasks with their titles', async ({ page }) => {
     await seedTasks(page);
     await page.goto('/');
-    await page.click('#nav-list');
 
     await expect(page.locator('.task-card')).toHaveCount(2);
     for (const task of SEED_TASKS) {
@@ -121,7 +119,6 @@ test.describe('List all tasks', () => {
 
   test('shows the empty state when there are no tasks', async ({ page }) => {
     await page.goto('/');
-    await page.click('#nav-list');
 
     await expect(page.locator('.task-card')).toHaveCount(0);
     await expect(page.locator('.empty-state')).toHaveText('No tasks yet');
@@ -130,7 +127,6 @@ test.describe('List all tasks', () => {
   test('renders task descriptions and creation dates', async ({ page }) => {
     await seedTasks(page);
     await page.goto('/');
-    await page.click('#nav-list');
 
     const expectedDate = await page.evaluate(
       () => new Date('2026-07-31T10:00:00.000Z').toLocaleDateString()
@@ -143,26 +139,24 @@ test.describe('List all tasks', () => {
   test('omits the description when it is empty', async ({ page }) => {
     await seedTasks(page);
     await page.goto('/');
-    await page.click('#nav-list');
 
     const card = page.locator('.task-card').filter({ hasText: 'Write specs' });
     await expect(card.locator('.task-desc')).toHaveCount(0);
   });
 });
 
-test.describe('Navigation', () => {
-  test('toggles between create and list views', async ({ page }) => {
+test.describe('Layout', () => {
+  test('shows the create form and task list on the same screen', async ({ page }) => {
     await page.goto('/');
 
     await expect(page.locator('#page-create')).toBeVisible();
-    await expect(page.locator('#page-list')).toBeHidden();
-
-    await page.click('#nav-list');
     await expect(page.locator('#page-list')).toBeVisible();
-    await expect(page.locator('#page-create')).toBeHidden();
 
-    await page.click('#nav-create');
+    await seedTasks(page);
+    await page.reload();
+
     await expect(page.locator('#page-create')).toBeVisible();
-    await expect(page.locator('#page-list')).toBeHidden();
+    await expect(page.locator('#page-list')).toBeVisible();
+    await expect(page.locator('.task-card')).toHaveCount(2);
   });
 });

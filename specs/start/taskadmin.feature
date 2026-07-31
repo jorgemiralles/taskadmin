@@ -13,7 +13,6 @@ Feature: Task Management
 
   Scenario: List all tasks
     Given there are existing tasks
-    When I navigate to the task list page
-    Then I should see a list of all tasks
+    Then I should see a list of all tasks on the same screen as the new task form
     And each task should display its title
 

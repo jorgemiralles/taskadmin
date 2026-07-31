@@ -27,25 +27,11 @@ header h1 {
   margin-bottom: 12px;
 }
 
-nav {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-}
-
-nav button {
-  padding: 8px 20px;
-  border: 1px solid #ccc;
-  background: #fff;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-nav button.active {
-  background: #0066cc;
-  color: #fff;
-  border-color: #0066cc;
+main {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  align-items: start;
 }
 
 main section {
@@ -104,6 +90,7 @@ main section h2 {
 }
 
 .flash {
+  grid-column: 1 / -1;
   padding: 10px 14px;
   margin: 0 0 16px;
   border-radius: 6px;

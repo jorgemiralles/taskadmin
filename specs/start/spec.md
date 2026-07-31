@@ -40,6 +40,7 @@ app.js              — client-side logic (CRUD, rendering, localStorage)
 - On page load, reads tasks from `localStorage` and renders them as a list.
 - Each task card displays the title and creation date.
 - Empty state: "No tasks yet" when the task array is empty.
+- The form and the list are shown together on the same screen, stacked vertically with the task list below the form; there is no separate navigation between them.
 
 ## 5. Data Flow
 

@@ -46,22 +46,6 @@ function showFlash(message) {
   flashTimer = setTimeout(() => flash.classList.add('hidden'), 3000);
 }
 
-// Navigation
-document.getElementById('nav-create').addEventListener('click', () => {
-  document.getElementById('nav-create').classList.add('active');
-  document.getElementById('nav-list').classList.remove('active');
-  document.getElementById('page-create').classList.remove('hidden');
-  document.getElementById('page-list').classList.add('hidden');
-});
-
-document.getElementById('nav-list').addEventListener('click', () => {
-  document.getElementById('nav-list').classList.add('active');
-  document.getElementById('nav-create').classList.remove('active');
-  document.getElementById('page-list').classList.remove('hidden');
-  document.getElementById('page-create').classList.add('hidden');
-  renderTaskList();
-});
-
 // Create task
 document.getElementById('task-form').addEventListener('submit', (e) => {
   e.preventDefault();
@@ -85,10 +69,8 @@ document.getElementById('task-form').addEventListener('submit', (e) => {
   titleInput.value = '';
   descInput.value = '';
   showFlash('Task created successfully');
-
-  // Switch to list view
-  document.getElementById('nav-list').click();
+  renderTaskList();
 });
 
-// Initial render if on list page
+// Initial render
 renderTaskList();
