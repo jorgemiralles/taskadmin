@@ -14,11 +14,11 @@ Vanilla JS/HTML/CSS single-page task management app. No build step, no runtime d
 ## Key facts
 
 - All data persisted in `localStorage` under key `tasks`
-- Task IDs generated via `crypto.randomUUID()`
+- Task IDs generated via `newId()` (`crypto.randomUUID()` with a fallback for non-secure contexts)
 - Entry point: `index.html` (loads `app.js`, `styles.css`)
-- XSS prevention: `escapeHtml()` in `app.js:33` (DOM textContent → innerHTML trick)
-- `opencode.json` requires user approval for all `bash` commands
-- Four commits in git history; one branch (`feature/playwright-e2e`), remote `origin` configured, no tags
+- XSS prevention: `escapeHtml()` in `app.js:36` (DOM textContent → innerHTML trick); `escapeAttr()` adds quote escaping for attribute context
+- `opencode.json` sets `"permission": "allow"` (commands auto-approved)
+- Git workflow: feature branches off `main`; remote `origin` configured; CI deploys to GitHub Pages from `main`
 - E2e specs live in `tests/`; `playwright.config.js` targets Chromium with `baseURL http://localhost:8080`
 
 ## Figma API

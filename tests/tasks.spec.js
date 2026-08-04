@@ -1,25 +1,10 @@
 const { test, expect } = require('@playwright/test');
+const { seedTasks, getStoredTasks, createTask } = require('./helpers');
 
 const SEED_TASKS = [
   { id: 'seed-1', title: 'Buy groceries', description: 'Milk, eggs, bread', createdAt: '2026-07-31T10:00:00.000Z' },
   { id: 'seed-2', title: 'Write specs', description: '', createdAt: '2026-07-31T11:00:00.000Z' },
 ];
-
-async function seedTasks(page, tasks = SEED_TASKS) {
-  await page.addInitScript((tasks) => {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-  }, tasks);
-}
-
-function getStoredTasks(page) {
-  return page.evaluate(() => JSON.parse(localStorage.getItem('tasks') || '[]'));
-}
-
-async function createTask(page, { title, description = '' }) {
-  await page.fill('#task-title', title);
-  await page.fill('#task-desc', description);
-  await page.click('#submit-btn');
-}
 
 test.describe('Create a new task', () => {
   test('creates a task and shows it in the list', async ({ page }) => {
@@ -108,7 +93,7 @@ test.describe('Create a new task', () => {
 
 test.describe('List all tasks', () => {
   test('shows existing tasks with their titles', async ({ page }) => {
-    await seedTasks(page);
+    await seedTasks(page, SEED_TASKS);
     await page.goto('/');
 
     await expect(page.locator('.task-card')).toHaveCount(2);
@@ -125,7 +110,7 @@ test.describe('List all tasks', () => {
   });
 
   test('renders task descriptions and creation dates', async ({ page }) => {
-    await seedTasks(page);
+    await seedTasks(page, SEED_TASKS);
     await page.goto('/');
 
     const expectedDate = await page.evaluate(
@@ -137,11 +122,26 @@ test.describe('List all tasks', () => {
   });
 
   test('omits the description when it is empty', async ({ page }) => {
-    await seedTasks(page);
+    await seedTasks(page, SEED_TASKS);
     await page.goto('/');
 
     const card = page.locator('.task-card').filter({ hasText: 'Write specs' });
     await expect(card.locator('.task-desc')).toHaveCount(0);
+  });
+
+  test('renders the board when a stored task is missing createdAt', async ({ page }) => {
+    await seedTasks(page, [
+      { id: 'broken-1', title: 'No date task', description: '' },
+      { id: 'ok-1', title: 'With date task', description: '', createdAt: '2026-07-31T10:00:00.000Z' },
+    ]);
+    await page.goto('/');
+
+    await expect(page.locator('.task-card')).toHaveCount(2);
+    await expect(page.locator('.task-card').filter({ hasText: 'No date task' })).toBeVisible();
+    await expect(page.locator('.task-card').filter({ hasText: 'With date task' })).toBeVisible();
+    const noDate = page.locator('.task-card').filter({ hasText: 'No date task' });
+    await expect(noDate.locator('.task-date')).toHaveCount(0);
+    await expect(noDate.locator('.task-time')).toHaveCount(0);
   });
 });
 
@@ -152,7 +152,7 @@ test.describe('Layout', () => {
     await expect(page.locator('#page-create')).toBeVisible();
     await expect(page.locator('#page-board')).toBeVisible();
 
-    await seedTasks(page);
+    await seedTasks(page, SEED_TASKS);
     await page.reload();
 
     await expect(page.locator('#page-create')).toBeVisible();

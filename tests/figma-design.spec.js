@@ -1,24 +1,11 @@
 const { test, expect } = require('@playwright/test');
+const { seedTasks, column, cardIn } = require('./helpers');
 
 const SEED_TASKS = [
   { id: 'seed-1', title: 'Buy groceries', description: 'Milk, eggs, bread', createdAt: '2026-07-31T10:00:00.000Z', status: 'prioritize' },
   { id: 'seed-2', title: 'Write specs', description: '', createdAt: '2026-07-31T11:00:00.000Z', status: 'in-progress' },
   { id: 'seed-3', title: 'Release v1', description: '', createdAt: '2026-07-31T12:00:00.000Z', status: 'done' },
 ];
-
-async function seedTasks(page, tasks = SEED_TASKS) {
-  await page.addInitScript((tasks) => {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-  }, tasks);
-}
-
-function column(page, status) {
-  return page.locator(`.kanban-column[data-status="${status}"]`);
-}
-
-function cardIn(page, status, title) {
-  return column(page, status).locator('.task-card').filter({ hasText: title });
-}
 
 test.describe('Figma design header and navigation', () => {
   test('shows a greeting header with Hello and a notification icon', async ({ page }) => {
@@ -74,7 +61,7 @@ test.describe('Figma design styling', () => {
 
 test.describe('Figma design task cards', () => {
   test('shows a status badge matching each card column', async ({ page }) => {
-    await seedTasks(page);
+    await seedTasks(page, SEED_TASKS);
     await page.goto('/');
 
     await expect(cardIn(page, 'prioritize', 'Buy groceries').locator('.task-badge')).toHaveText('To-do');
@@ -83,7 +70,7 @@ test.describe('Figma design task cards', () => {
   });
 
   test('shows a time on the task card', async ({ page }) => {
-    await seedTasks(page);
+    await seedTasks(page, SEED_TASKS);
     await page.goto('/');
 
     const expectedTime = await page.evaluate(
@@ -95,7 +82,7 @@ test.describe('Figma design task cards', () => {
   });
 
   test('shows the project (description) and title on the card', async ({ page }) => {
-    await seedTasks(page);
+    await seedTasks(page, SEED_TASKS);
     await page.goto('/');
 
     const card = cardIn(page, 'prioritize', 'Buy groceries');

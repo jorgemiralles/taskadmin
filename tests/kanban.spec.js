@@ -1,4 +1,5 @@
 const { test, expect } = require('@playwright/test');
+const { seedTasks, getStoredTasks, column, cardIn, createTask } = require('./helpers');
 
 const SEED_TASKS = [
   { id: 'seed-1', title: 'Buy groceries', description: 'Milk, eggs, bread', createdAt: '2026-07-31T10:00:00.000Z', status: 'prioritize' },
@@ -6,33 +7,9 @@ const SEED_TASKS = [
   { id: 'seed-3', title: 'Release v1', description: '', createdAt: '2026-07-31T12:00:00.000Z', status: 'done' },
 ];
 
-async function seedTasks(page, tasks = SEED_TASKS) {
-  await page.addInitScript((tasks) => {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-  }, tasks);
-}
-
-function getStoredTasks(page) {
-  return page.evaluate(() => JSON.parse(localStorage.getItem('tasks') || '[]'));
-}
-
-function column(page, status) {
-  return page.locator(`.kanban-column[data-status="${status}"]`);
-}
-
-function cardIn(page, status, title) {
-  return column(page, status).locator('.task-card').filter({ hasText: title });
-}
-
-async function createTask(page, { title, description = '' }) {
-  await page.fill('#task-title', title);
-  await page.fill('#task-desc', description);
-  await page.click('#submit-btn');
-}
-
 test.describe('Kanban board layout', () => {
   test('shows three columns Prioritize, In Progress, and Done', async ({ page }) => {
-    await seedTasks(page);
+    await seedTasks(page, SEED_TASKS);
     await page.goto('/');
 
     await expect(page.locator('.kanban-column')).toHaveCount(3);
@@ -51,7 +28,7 @@ test.describe('Kanban board layout', () => {
   });
 
   test('sorts existing tasks into their columns by status', async ({ page }) => {
-    await seedTasks(page);
+    await seedTasks(page, SEED_TASKS);
     await page.goto('/');
 
     await expect(cardIn(page, 'prioritize', 'Buy groceries')).toBeVisible();
@@ -80,7 +57,7 @@ test.describe('Moving tasks', () => {
   });
 
   test('drag a task from Prioritize to In Progress', async ({ page }) => {
-    await seedTasks(page);
+    await seedTasks(page, SEED_TASKS);
     await page.goto('/');
 
     await cardIn(page, 'prioritize', 'Buy groceries').dragTo(column(page, 'in-progress'));
@@ -92,7 +69,7 @@ test.describe('Moving tasks', () => {
   });
 
   test('drag a task from In Progress to Done', async ({ page }) => {
-    await seedTasks(page);
+    await seedTasks(page, SEED_TASKS);
     await page.goto('/');
 
     await cardIn(page, 'in-progress', 'Write specs').dragTo(column(page, 'done'));
@@ -103,7 +80,7 @@ test.describe('Moving tasks', () => {
   });
 
   test('drag a task back to a previous column', async ({ page }) => {
-    await seedTasks(page);
+    await seedTasks(page, SEED_TASKS);
     await page.goto('/');
 
     await cardIn(page, 'in-progress', 'Write specs').dragTo(column(page, 'prioritize'));
@@ -113,7 +90,7 @@ test.describe('Moving tasks', () => {
   });
 
   test('drag a task from Prioritize straight to Done', async ({ page }) => {
-    await seedTasks(page);
+    await seedTasks(page, SEED_TASKS);
     await page.goto('/');
 
     await cardIn(page, 'prioritize', 'Buy groceries').dragTo(column(page, 'done'));
@@ -140,5 +117,15 @@ test.describe('Moving tasks', () => {
     await page.goto('/');
 
     await expect(cardIn(page, 'prioritize', 'Old task')).toBeVisible();
+  });
+
+  test('tasks with an unknown status fall back to Prioritize', async ({ page }) => {
+    await seedTasks(page, [
+      { id: 'weird-1', title: 'Archive task', description: '', createdAt: '2026-07-31T10:00:00.000Z', status: 'archive' }
+    ]);
+    await page.goto('/');
+
+    await expect(cardIn(page, 'prioritize', 'Archive task')).toBeVisible();
+    await expect(cardIn(page, 'prioritize', 'Archive task').locator('.task-badge')).toHaveText('To-do');
   });
 });

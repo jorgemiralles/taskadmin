@@ -21,11 +21,16 @@ function getTasks() {
 }
 
 function saveTasks(tasks) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function taskStatus(task) {
-  return task.status || 'prioritize';
+  return STATUSES.some(s => s.value === task.status) ? task.status : 'prioritize';
 }
 
 function escapeHtml(text) {
@@ -34,18 +39,35 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+function escapeAttr(value) {
+  return escapeHtml(value).replace(/"/g, '&quot;');
+}
+
+function parseDate(createdAt) {
+  const date = new Date(createdAt);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function newId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `task-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
+
 function renderCard(task) {
   const status = taskStatus(task);
+  const created = parseDate(task.createdAt);
   return `
-    <div class="task-card" draggable="true" data-id="${task.id}">
+    <div class="task-card" draggable="true" data-id="${escapeAttr(task.id)}">
       <div class="task-card-top">
         ${task.description ? `<p class="task-desc">${escapeHtml(task.description)}</p>` : ''}
         <span class="task-badge badge-${status}">${BADGE_LABELS[status]}</span>
       </div>
       <h3>${escapeHtml(task.title)}</h3>
       <div class="task-meta">
-        <p class="task-date">${new Date(task.createdAt).toLocaleDateString()}</p>
-        <p class="task-time">${new Date(task.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+        ${created ? `<p class="task-date">${created.toLocaleDateString()}</p>` : ''}
+        ${created ? `<p class="task-time">${created.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>` : ''}
       </div>
     </div>
   `;
@@ -91,13 +113,16 @@ document.getElementById('task-form').addEventListener('submit', (e) => {
 
   const tasks = getTasks();
   tasks.push({
-    id: crypto.randomUUID(),
+    id: newId(),
     title,
     description,
     status: 'prioritize',
     createdAt: new Date().toISOString()
   });
-  saveTasks(tasks);
+  if (!saveTasks(tasks)) {
+    showFlash('Failed to save task');
+    return;
+  }
 
   titleInput.value = '';
   descInput.value = '';
@@ -134,7 +159,10 @@ board.addEventListener('dragover', (e) => {
 
 board.addEventListener('dragleave', (e) => {
   const column = e.target.closest('.kanban-column');
-  if (column) column.classList.remove('drag-over');
+  if (!column) return;
+  const related = e.relatedTarget;
+  if (related instanceof Node && column.contains(related)) return;
+  column.classList.remove('drag-over');
 });
 
 board.addEventListener('drop', (e) => {
