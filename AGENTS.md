@@ -20,3 +20,9 @@ Vanilla JS/HTML/CSS single-page task management app. No build step, no runtime d
 - `opencode.json` requires user approval for all `bash` commands
 - Four commits in git history; one branch (`feature/playwright-e2e`), remote `origin` configured, no tags
 - E2e specs live in `tests/`; `playwright.config.js` targets Chromium with `baseURL http://localhost:8080`
+
+## Figma API
+
+- Personal access token stored as env var; `figd_` tokens must be sent via the `X-Figma-Token` header, **not** `Authorization: Bearer`
+- User associated with token: Jorge (jorgemiralles@gmail.com)
+- Base URL: `https://api.figma.com/v1`

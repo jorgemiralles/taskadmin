@@ -29,7 +29,7 @@ test.describe('Create a new task', () => {
 
     await expect(page.locator('#flash')).toHaveText('Task created successfully');
     await expect(page.locator('#flash')).toBeVisible();
-    await expect(page.locator('#page-list')).toBeVisible();
+    await expect(page.locator('#page-board')).toBeVisible();
     await expect(page.locator('.task-card').filter({ hasText: 'Buy groceries' })).toBeVisible();
   });
 
@@ -121,7 +121,7 @@ test.describe('List all tasks', () => {
     await page.goto('/');
 
     await expect(page.locator('.task-card')).toHaveCount(0);
-    await expect(page.locator('.empty-state')).toHaveText('No tasks yet');
+    await expect(page.locator('.column-body .empty-state')).toHaveCount(3);
   });
 
   test('renders task descriptions and creation dates', async ({ page }) => {
@@ -150,13 +150,13 @@ test.describe('Layout', () => {
     await page.goto('/');
 
     await expect(page.locator('#page-create')).toBeVisible();
-    await expect(page.locator('#page-list')).toBeVisible();
+    await expect(page.locator('#page-board')).toBeVisible();
 
     await seedTasks(page);
     await page.reload();
 
     await expect(page.locator('#page-create')).toBeVisible();
-    await expect(page.locator('#page-list')).toBeVisible();
+    await expect(page.locator('#page-board')).toBeVisible();
     await expect(page.locator('.task-card')).toHaveCount(2);
   });
 });
