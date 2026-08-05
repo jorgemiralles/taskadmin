@@ -14,6 +14,7 @@ Vanilla JS/HTML/CSS single-page task management app with a Node.js/Express API b
 - **Connect to Postgres directly**: `PGPASSWORD=root psql -h my-postgres-2 -U postgres` (superuser) or `PGPASSWORD=taskadmin psql -h my-postgres-2 -U taskadmin -d taskadmin` (app role)
 - Specs are Gherkin `.feature` files in `specs/start/` (not runnable)
 - **No lint or typecheck** configured; CI runs e2e against a Postgres service container on push/PR and deploys to GitHub Pages when tests pass (`.github/workflows/ci.yml`)
+- **Deploy to Render**: `render.yaml` defines a web service (`node server/index.js`) plus a managed Postgres. Render injects the production `DATABASE_URL` from the linked database (`taskadmindb_2i4k` on `*.frankfurt-postgres.render.com`) into the service env, so no credentials live in the repo. Add `render.yaml` to the Render service (Blueprint → New Blueprint Instance) or via the dashboard "Deploy from repo"
 
 ## Key facts
 
