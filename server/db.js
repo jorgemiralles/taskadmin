@@ -4,7 +4,16 @@ const connectionString =
   process.env.DATABASE_URL ||
   'postgres://taskadmin:taskadmin@my-postgres-2:5432/taskadmin';
 
-const pool = new Pool({ connectionString });
+const connectionUrl = new URL(connectionString);
+const sslMode = connectionUrl.searchParams.get('sslmode');
+const ssl =
+  sslMode === 'disable'
+    ? false
+    : sslMode === 'require' || connectionUrl.hostname.endsWith('.render.com')
+      ? { rejectUnauthorized: false }
+      : undefined;
+
+const pool = new Pool({ connectionString, ssl });
 
 const SCHEMA = `
   CREATE TABLE IF NOT EXISTS tasks (
