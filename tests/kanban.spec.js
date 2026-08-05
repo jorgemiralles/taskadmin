@@ -1,5 +1,9 @@
 const { test, expect } = require('@playwright/test');
-const { seedTasks, getStoredTasks, column, cardIn, createTask } = require('./helpers');
+const { clearTasks, seedTasks, getStoredTasks, column, cardIn, createTask } = require('./helpers');
+
+test.beforeEach(async ({ page }) => {
+  await clearTasks(page);
+});
 
 const SEED_TASKS = [
   { id: 'seed-1', title: 'Buy groceries', description: 'Milk, eggs, bread', createdAt: '2026-07-31T10:00:00.000Z', status: 'prioritize' },
@@ -65,7 +69,7 @@ test.describe('Moving tasks', () => {
     await expect(cardIn(page, 'in-progress', 'Buy groceries')).toBeVisible();
     await expect(cardIn(page, 'prioritize', 'Buy groceries')).toHaveCount(0);
     const stored = await getStoredTasks(page);
-    expect(stored.find(t => t.id === 'seed-1').status).toBe('in-progress');
+    expect(stored.find(t => t.title === 'Buy groceries').status).toBe('in-progress');
   });
 
   test('drag a task from In Progress to Done', async ({ page }) => {
@@ -76,7 +80,7 @@ test.describe('Moving tasks', () => {
 
     await expect(cardIn(page, 'done', 'Write specs')).toBeVisible();
     await expect(cardIn(page, 'in-progress', 'Write specs')).toHaveCount(0);
-    expect((await getStoredTasks(page)).find(t => t.id === 'seed-2').status).toBe('done');
+    expect((await getStoredTasks(page)).find(t => t.title === 'Write specs').status).toBe('done');
   });
 
   test('drag a task back to a previous column', async ({ page }) => {
@@ -86,7 +90,7 @@ test.describe('Moving tasks', () => {
     await cardIn(page, 'in-progress', 'Write specs').dragTo(column(page, 'prioritize'));
 
     await expect(cardIn(page, 'prioritize', 'Write specs')).toBeVisible();
-    expect((await getStoredTasks(page)).find(t => t.id === 'seed-2').status).toBe('prioritize');
+    expect((await getStoredTasks(page)).find(t => t.title === 'Write specs').status).toBe('prioritize');
   });
 
   test('drag a task from Prioritize straight to Done', async ({ page }) => {
@@ -96,13 +100,12 @@ test.describe('Moving tasks', () => {
     await cardIn(page, 'prioritize', 'Buy groceries').dragTo(column(page, 'done'));
 
     await expect(cardIn(page, 'done', 'Buy groceries')).toBeVisible();
-    expect((await getStoredTasks(page)).find(t => t.id === 'seed-1').status).toBe('done');
+    expect((await getStoredTasks(page)).find(t => t.title === 'Buy groceries').status).toBe('done');
   });
 
   test('column position survives a page reload', async ({ page }) => {
+    await seedTasks(page, SEED_TASKS);
     await page.goto('/');
-    await page.evaluate((tasks) => localStorage.setItem('tasks', JSON.stringify(tasks)), SEED_TASKS);
-    await page.reload();
 
     await cardIn(page, 'in-progress', 'Write specs').dragTo(column(page, 'done'));
     await page.reload();

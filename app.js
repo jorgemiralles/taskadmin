@@ -1,5 +1,3 @@
-const STORAGE_KEY = 'tasks';
-
 const STATUSES = [
   { value: 'prioritize', label: 'Prioritize' },
   { value: 'in-progress', label: 'In Progress' },
@@ -12,21 +10,28 @@ const BADGE_LABELS = {
   done: 'Done'
 };
 
-function getTasks() {
+async function apiFetch(path, options = {}) {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    const response = await fetch(path, {
+      headers: { 'Content-Type': 'application/json' },
+      ...options
+    });
+    if (response.status === 204) {
+      return { ok: true, data: null };
+    }
+    const data = await response.json().catch(() => null);
+    return { ok: response.ok, data };
   } catch {
-    return [];
+    return { ok: false, data: null };
   }
 }
 
-function saveTasks(tasks) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-    return true;
-  } catch {
-    return false;
+async function loadTasks() {
+  const result = await apiFetch('/api/tasks');
+  if (!result.ok || !Array.isArray(result.data)) {
+    throw new Error('Failed to load tasks');
   }
+  return result.data;
 }
 
 function taskStatus(task) {
@@ -48,13 +53,6 @@ function parseDate(createdAt) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-function newId() {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
-  }
-  return `task-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
-}
-
 function renderCard(task) {
   const status = taskStatus(task);
   const created = parseDate(task.createdAt);
@@ -73,9 +71,15 @@ function renderCard(task) {
   `;
 }
 
-function renderBoard() {
+async function renderBoard() {
   const board = document.getElementById('kanban-board');
-  const tasks = getTasks();
+  let tasks;
+  try {
+    tasks = await loadTasks();
+  } catch {
+    showFlash('Could not reach the server');
+    return;
+  }
 
   board.innerHTML = STATUSES.map(col => {
     const colTasks = tasks.filter(task => taskStatus(task) === col.value);
@@ -101,7 +105,7 @@ function showFlash(message) {
 }
 
 // Create task
-document.getElementById('task-form').addEventListener('submit', (e) => {
+document.getElementById('task-form').addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const titleInput = document.getElementById('task-title');
@@ -111,23 +115,20 @@ document.getElementById('task-form').addEventListener('submit', (e) => {
 
   if (!title) return;
 
-  const tasks = getTasks();
-  tasks.push({
-    id: newId(),
-    title,
-    description,
-    status: 'prioritize',
-    createdAt: new Date().toISOString()
+  const result = await apiFetch('/api/tasks', {
+    method: 'POST',
+    body: JSON.stringify({ title, description })
   });
-  if (!saveTasks(tasks)) {
-    showFlash('Failed to save task');
+
+  if (!result.ok) {
+    showFlash('Failed to create task');
     return;
   }
 
   titleInput.value = '';
   descInput.value = '';
   showFlash('Task created successfully');
-  renderBoard();
+  await renderBoard();
 });
 
 // Drag and drop
@@ -165,19 +166,31 @@ board.addEventListener('dragleave', (e) => {
   column.classList.remove('drag-over');
 });
 
-board.addEventListener('drop', (e) => {
+board.addEventListener('drop', async (e) => {
   e.preventDefault();
   const column = e.target.closest('.kanban-column');
   if (!column || !draggedId) return;
 
   const targetStatus = column.dataset.status;
-  const tasks = getTasks();
-  const task = tasks.find(t => t.id === draggedId);
+  const id = draggedId;
+  let task;
+  try {
+    const tasks = await loadTasks();
+    task = tasks.find(t => t.id === id);
+  } catch {
+    showFlash('Could not reach the server');
+  }
 
   if (task && taskStatus(task) !== targetStatus) {
-    task.status = targetStatus;
-    saveTasks(tasks);
-    renderBoard();
+    const result = await apiFetch(`/api/tasks/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status: targetStatus })
+    });
+
+    if (!result.ok) {
+      showFlash('Failed to update task');
+    }
+    await renderBoard();
   }
 
   document.querySelectorAll('.kanban-column.drag-over').forEach(c => c.classList.remove('drag-over'));

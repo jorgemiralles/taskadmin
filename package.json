@@ -2,8 +2,9 @@
   "name": "taskadmin",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "server/index.js",
   "scripts": {
+    "start": "node server/index.js",
     "test:e2e": "playwright test"
   },
   "repository": {
@@ -20,5 +21,9 @@
   "homepage": "https://github.com/jorgemiralles/taskadmin#readme",
   "devDependencies": {
     "@playwright/test": "^1.62.1"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "pg": "^8.22.0"
   }
 }

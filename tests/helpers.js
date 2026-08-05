@@ -1,11 +1,22 @@
-async function seedTasks(page, tasks) {
-  await page.addInitScript((tasks) => {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-  }, tasks);
+async function clearTasks(page) {
+  await page.request.delete('/api/tasks');
 }
 
-function getStoredTasks(page) {
-  return page.evaluate(() => JSON.parse(localStorage.getItem('tasks') || '[]'));
+const VALID_STATUSES = ['prioritize', 'in-progress', 'done'];
+
+async function seedTasks(page, tasks) {
+  await clearTasks(page);
+  for (const task of tasks) {
+    const { status, ...rest } = task;
+    const payload =
+      status === undefined || VALID_STATUSES.includes(status) ? { ...task } : rest;
+    await page.request.post('/api/tasks', { data: payload });
+  }
+}
+
+async function getStoredTasks(page) {
+  const response = await page.request.get('/api/tasks');
+  return response.json();
 }
 
 function column(page, status) {
@@ -22,4 +33,4 @@ async function createTask(page, { title, description = '' }) {
   await page.click('#submit-btn');
 }
 
-module.exports = { seedTasks, getStoredTasks, column, cardIn, createTask };
+module.exports = { clearTasks, seedTasks, getStoredTasks, column, cardIn, createTask };

@@ -1,5 +1,9 @@
 const { test, expect } = require('@playwright/test');
-const { seedTasks, getStoredTasks, createTask } = require('./helpers');
+const { clearTasks, seedTasks, getStoredTasks, createTask } = require('./helpers');
+
+test.beforeEach(async ({ page }) => {
+  await clearTasks(page);
+});
 
 const SEED_TASKS = [
   { id: 'seed-1', title: 'Buy groceries', description: 'Milk, eggs, bread', createdAt: '2026-07-31T10:00:00.000Z' },
@@ -18,7 +22,7 @@ test.describe('Create a new task', () => {
     await expect(page.locator('.task-card').filter({ hasText: 'Buy groceries' })).toBeVisible();
   });
 
-  test('persists the created task to localStorage', async ({ page }) => {
+  test('persists the created task via the API', async ({ page }) => {
     await page.goto('/');
 
     await createTask(page, { title: 'Buy groceries', description: 'Milk, eggs, bread' });
@@ -129,7 +133,7 @@ test.describe('List all tasks', () => {
     await expect(card.locator('.task-desc')).toHaveCount(0);
   });
 
-  test('renders the board when a stored task is missing createdAt', async ({ page }) => {
+  test('assigns a creation date to tasks created without one', async ({ page }) => {
     await seedTasks(page, [
       { id: 'broken-1', title: 'No date task', description: '' },
       { id: 'ok-1', title: 'With date task', description: '', createdAt: '2026-07-31T10:00:00.000Z' },
@@ -140,8 +144,10 @@ test.describe('List all tasks', () => {
     await expect(page.locator('.task-card').filter({ hasText: 'No date task' })).toBeVisible();
     await expect(page.locator('.task-card').filter({ hasText: 'With date task' })).toBeVisible();
     const noDate = page.locator('.task-card').filter({ hasText: 'No date task' });
-    await expect(noDate.locator('.task-date')).toHaveCount(0);
-    await expect(noDate.locator('.task-time')).toHaveCount(0);
+    await expect(noDate.locator('.task-date')).toBeVisible();
+    const stored = await getStoredTasks(page);
+    const created = stored.find(t => t.title === 'No date task');
+    expect(created.createdAt).toBeTruthy();
   });
 });
 
