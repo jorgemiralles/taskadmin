@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Admin</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <h1>Task Admin</h1>
+    </header>
+
+    <main>
+      <section id="list-view" class="panel">
+        <div class="list-header">
+          <h2>Tasks</h2>
+          <button id="add-task-btn" class="btn btn-primary">Add Task</button>
+        </div>
+        <table id="task-table" class="task-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Priority</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="task-list"></tbody>
+        </table>
+        <p id="empty-state" class="empty-state hidden">No tasks yet. Click "Add Task" to create one.</p>
+      </section>
+
+      <section id="details-view" class="panel hidden">
+        <div class="list-header">
+          <h2>Task Details</h2>
+          <div>
+            <button id="edit-task-btn" class="btn">Edit</button>
+            <button id="delete-task-btn" class="btn btn-danger">Delete</button>
+            <button id="back-btn" class="btn">Back</button>
+          </div>
+        </div>
+        <dl class="task-details">
+          <dt>Title</dt>
+          <dd id="detail-title"></dd>
+          <dt>Description</dt>
+          <dd id="detail-description"></dd>
+          <dt>Priority</dt>
+          <dd id="detail-priority"></dd>
+          <dt>Status</dt>
+          <dd id="detail-status"></dd>
+        </dl>
+      </section>
+
+      <section id="form-view" class="panel hidden">
+        <div class="list-header">
+          <h2 id="form-title">New Task</h2>
+        </div>
+        <form id="task-form" novalidate>
+          <input type="hidden" id="task-id">
+          <div class="form-field">
+            <label for="title">Title</label>
+            <input type="text" id="title" name="title" maxlength="255" required>
+          </div>
+          <div class="form-field">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="4"></textarea>
+          </div>
+          <div class="form-field">
+            <label for="priority">Priority</label>
+            <select id="priority" name="priority">
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+            </select>
+          </div>
+          <div class="form-field" id="status-field">
+            <label for="status">Status</label>
+            <select id="status" name="status">
+              <option value="Open">Open</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+          <div class="form-actions">
+            <button type="submit" id="save-btn" class="btn btn-primary">Save</button>
+            <button type="button" id="cancel-btn" class="btn">Cancel</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <div id="confirm-modal" class="modal-backdrop hidden">
+    <div class="modal">
+      <h3>Delete task</h3>
+      <p>Are you sure you want to delete the task "<span id="modal-task-title"></span>"?</p>
+      <div class="form-actions">
+        <button id="confirm-delete-btn" class="btn btn-danger">Delete</button>
+        <button id="cancel-delete-btn" class="btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
